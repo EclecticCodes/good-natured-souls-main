@@ -1,60 +1,83 @@
 "use client";
-
 import { usePathname } from "next/navigation";
 
-type Link = {
-  name: string;
-  href: string;
-};
-
-const links: Link[] = [
-  { name: "About", href: "/about" },
-  { name: "Privacy Policy", href: "/privacy" },
-  { name: "Contact", href: "/contact" },
-  { name: "Licensing", href: "/licensing" },
+const footerLinks = [
+  {
+    heading: "Navigate",
+    links: [
+      { name: "Home", href: "/" },
+      { name: "Articles", href: "/articles" },
+      { name: "Artists", href: "/artists" },
+      { name: "Shows", href: "/shows" },
+      { name: "Store", href: "/store" },
+      { name: "Fan Club", href: "/fanclub" },
+      { name: "About", href: "/about" },
+    ],
+  },
+  {
+    heading: "Store",
+    links: [
+      { name: "Digital Downloads", href: "/store?category=digital" },
+      { name: "Vinyl", href: "/store?category=vinyl" },
+      { name: "Tees", href: "/store?category=tees" },
+      { name: "Hoodies", href: "/store?category=hoodies" },
+      { name: "Accessories", href: "/store?category=accessories" },
+    ],
+  },
+  {
+    heading: "Legal",
+    links: [
+      { name: "Privacy Policy", href: "/privacy" },
+      { name: "Contact", href: "/contact" },
+      { name: "Licensing", href: "/licensing" },
+    ],
+  },
 ];
 
 const Footer = () => {
-  console.log("Footer rendered");
   const pathname = usePathname();
-
-  if (pathname.startsWith("/admin")) {
-    return null;
-  }
+  if (pathname.startsWith("/admin")) return null;
 
   return (
-    <footer className="bg-primary border-t border-gray-200 py-8">
-      <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
-        <div className="sm:flex sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-2">
-            <a
-              href="/"
-              className="flex mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
-            >
-              <span className="self-center text-4xl font-erica whitespace-nowrap">
-                GNS
-              </span>
-            </a>
-            <span className="block text-sm text-gray-500 dark:text-gray-400">
-              © 2024{" "}
-              <a href="/" className="hover:underline">
-                Good Natured Souls™
-              </a>
-              . All Rights Reserved.
-            </span>
-            <span className="block text-sm text-gray-500 dark:text-gray-400">
-              Site Credits
-            </span>
+    <footer className="bg-primary border-t border-secondaryInteraction py-12">
+      <div className="w-full max-w-screen-xl mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          {/* Brand */}
+          <div className="flex flex-col gap-3">
+            <a href="/" className="font-erica text-4xl">GNS</a>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Good Natured Souls is a New York City based independent music label representing up and coming Hip-Hop and R&B acts.
+            </p>
           </div>
-          <ul className="flex flex-wrap items-center  my-6 text-sm font-medium text-gray-500 sm:my-6 dark:text-gray-400">
-            {links.map((link) => (
-              <li key={link.name}>
-                <a href={link.href} className="hover:underline me-4 md:me-6">
-                  {link.name}
-                </a>
-              </li>
-            ))}
-          </ul>
+
+          {/* Link columns */}
+          {footerLinks.map((col) => (
+            <div key={col.heading}>
+              <h3 className="font-oswald text-sm font-bold tracking-widest uppercase text-accent mb-4">{col.heading}</h3>
+              <ul className="flex flex-col gap-2">
+                {col.links.map((link) => (
+                  <li key={link.name}>
+                    <a href={link.href} className="text-sm text-gray-500 hover:text-white transition-colors">
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-secondaryInteraction pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <span className="text-sm text-gray-500">
+            © 2026{" "}
+            <a href="/" className="hover:underline">Good Natured Souls™</a>
+            . All Rights Reserved.
+          </span>
+          <span className="text-sm text-gray-600">Site Credits</span>
+          <a href="https://discord.gg/tr6Gybnu" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[#5865F2] hover:opacity-80 transition-opacity font-oswald tracking-widest">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.11 18.1.132 18.115a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+            JOIN DISCORD
+          </a>
         </div>
       </div>
     </footer>

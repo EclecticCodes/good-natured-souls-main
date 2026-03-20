@@ -1,14 +1,17 @@
 import { defineConfig } from "sanity";
-import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
-import schemas from "./types/sanity/Schemas";// Import from the index.ts file
+import { defineStructure } from "@sanity/structure"; // Correct way to import structure
+import schemas from "./sanity/Schemas";
 
 const config = defineConfig({
   projectId: "evw8b7bx",
   dataset: "production",
   title: "Good Natured Souls",
   basePath: "/admin",
-  plugins: [structureTool(), visionTool()],
+  plugins: [
+    visionTool(),
+    defineStructure()  // Define your structure here
+  ],
   schema: { types: schemas },
 });
 

@@ -7,11 +7,11 @@ import {
   Oswald,
 } from "next/font/google";
 import "./globals.css";
-import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import Marquee from "./marquee";
 import { AnimatePresence, motion } from "framer-motion";
 import { delay } from "sanity/migrate";
+import Providers from "./Components/Providers";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const ericaOne = Erica_One({
@@ -54,10 +54,12 @@ export default function RootLayout({
         className={`text-text bg-background ${inter.variable} ${ericaOne.variable} ${cormorant.variable} ${homemadeApple.variable} ${oswald.variable}`}
       >
 
-        <Navbar />
+        <Providers>
+        
         {children}
         <Footer />
-      </body>
+      </Providers>
+    </body>
     </html>
   );
 }

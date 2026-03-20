@@ -1,11 +1,9 @@
-// fill out later
 import { groq } from "next-sanity";
 import client from "./sanity-client";
-import { Artist } from "@/types/Artist";
-import { Project } from "@/types/Project";
+import { Artist } from "./Artist";
+import { Project } from "./Project";
 
-const revalidate = 10;
-
+// Remove revalidate from the client.fetch() call, it should be handled by Next.js.
 export async function getArtists(): Promise<Artist[]> {
   const query = groq`*[_type == "artist"]{
       _id,
@@ -16,8 +14,8 @@ export async function getArtists(): Promise<Artist[]> {
       "profileImage": profileImage.asset->url,
   }`;
 
-  const artists = await client.fetch(query, {}, { next: { revalidate } });
-  console.log("Fetched projects:", artists); // Log fetched artists
+  const artists = await client.fetch(query); // Removed the { next: { revalidate } }
+  console.log("Fetched artists:", artists); // Log fetched artists
   return artists;
 }
 

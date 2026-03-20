@@ -1,12 +1,12 @@
-import Header from "@/app/Components/Header";
-import { getArtistWithProjects } from "@/sanity/sanity-utils";
+import Header from "../../Components/Header";
+import { getArtistWithProjects } from "../../../sanity/strapi-utils";
 import React from "react";
 import Polaroid from "../../Components/Polaroid";
-import { TopTracks } from "@/app/artists/[slug]/TopTracks";
-import { NewMusic } from "@/app/Components/NewMusic";
-import { PortableText } from "@portabletext/react";
-import Icon, { IconName } from "@/app/Components/Icon";
-import { PageWrapper } from "@/app/Components/PageWrapper";
+import { TopTracks } from "./TopTracks";
+import { NewMusic } from "../../Components/NewMusic";
+
+import Icon, { IconName } from "../../Components/Icon";
+import { PageWrapper } from "../../Components/PageWrapper";
 
 type Props = {
   params: { slug: string };
@@ -57,7 +57,7 @@ const ArtistPage = async ({ params: { slug } }: Props) => {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <Icon name={link.name as IconName} />
+                        <Icon name={link.name.toLowerCase() as IconName} />
                       </a>
                     ))}
                 </div>
@@ -71,7 +71,7 @@ const ArtistPage = async ({ params: { slug } }: Props) => {
                 </div>
                 <div className="max-h-96 overflow-y-auto flex-1 text-2xl custom-scrollbar md:p-4 p-2">
                   {artist?.about ? (
-                    <PortableText value={artist?.about} />
+                    <div>{artist.about.map((block: any, i: number) => (<p key={i}>{block.children?.map((c: any) => c.text).join("")}</p>))}</div>
                   ) : (
                     <p className="text-center">No information available</p>
                   )}

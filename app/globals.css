@@ -1,27 +1,45 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-background: #161616;
+  --color-primary: #000000;
+  --color-primaryInteraction: #242424;
+  --color-secondary: #242424;
+  --color-secondaryInteraction: #161616;
+  --color-accent: #F0B51E;
+  --color-accentInteraction: #d59e0f;
+  --color-text: #FFFFFF;
+
+  --font-inter: var(--font-inter);
+  --font-erica: var(--font-erica);
+  --font-cormorant: var(--font-cormorant);
+  --font-homemadeApple: var(--font-homemadeApple);
+  --font-oswald: var(--font-oswald);
+
+  --animate-slideInRight: slideInRight 0.5s ease-in-out forwards;
+  --animate-slideInLeft: slideInLeft 0.5s ease-in-out forwards;
+
+  @keyframes slideInRight {
+    0% { transform: translateX(100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideInLeft {
+    0% { transform: translateX(-100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+}
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px; /* Width of the scrollbar */
+  width: 8px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.5); /* Track background with transparency */
+  background: rgba(0, 0, 0, 0.5);
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(
-    60,
-    55,
-    55,
-    0.8
-  ); /* Scrollbar color with transparency */
-  border-radius: 10px; /* Roundness of the scrollbar */
-  border: 2px solid transparent; /* Optional: space between thumb and track */
+  background-color: rgba(60, 55, 55, 0.8);
+  border-radius: 10px;
+  border: 2px solid transparent;
 }
-
-/* Firefox scrollbar styles */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(60, 55, 55, 0.8) rgba(0, 0, 0, 0.5);

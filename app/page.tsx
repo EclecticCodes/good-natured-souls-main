@@ -2,13 +2,13 @@ import Image from "next/image";
 import Jumbotron from "./Components/Jumbotron";
 import Description from "./Components/Description";
 import type { Metadata } from "next";
-import { getAllArtistsWithFeaturedProjects } from "@/types/sanity/sanity-utils";
+import { getAllArtistsWithFeaturedProjects } from "../sanity/strapi-utils";
 import { NewMusic } from "./Components/NewMusic";
 import FeaturedArtists from "./Components/FeaturedArtists";
-import { Artist } from "@/types/Artist";
+import FeaturedShows from "./Components/FeaturedShows";
+import FeaturedProducts from "./Components/FeaturedProducts";
 import { PageWrapper } from "./Components/PageWrapper";
 import Marquee from "./marquee";
-import ScrollHandler from "./ScrollHandler";
 
 export const metadata: Metadata = {
   title: "Good Natured Souls",
@@ -21,13 +21,17 @@ export default async function Home() {
     <main>
       <PageWrapper>
         <Jumbotron />
-        <Marquee /> {/* Marquee appears after the Jumbotron */}
+        <Marquee />
         <Description />
-        <Marquee /> {/* Marquee appears between Description and NewMusic */}
+        <Marquee />
         <NewMusic projects={homePageData.featuredProjects} />
         <Marquee />
         <FeaturedArtists artists={homePageData.artists} />
-        <Marquee /> {/* Marquee appears at the bottom before the end */}
+        <Marquee />
+        <FeaturedShows />
+        <Marquee />
+        <FeaturedProducts />
+        <Marquee />
       </PageWrapper>
     </main>
   );

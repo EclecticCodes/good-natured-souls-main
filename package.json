@@ -1,34 +1,39 @@
 {
   "name": "good-natured-souls",
   "version": "0.1.0",
-  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start"
   },
   "dependencies": {
-    "@portabletext/react": "^3.1.0",
-    "@sanity/image-url": "^1.1.0",
-    "@sanity/vision": "^3.79.0",
-    "framer-motion": "^12.5.0",
-    "next": "^15.2.2",
-    "next-sanity": "^9.9.4",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-is": "^19.0.0",
-    "sanity": "^3.79.0",
-    "styled-components": "^6.1.15"
+    "@portabletext/react": "^3.2.1",
+    "@sanity/client": "^6.28.4",
+    "@sanity/structure": "^2.36.2",
+    "@sanity/vision": "^3.81.0",
+    "@stripe/react-stripe-js": "^5.6.1",
+    "@stripe/stripe-js": "^8.11.0",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
+    "framer-motion": "^12.6.2",
+    "next": "^15.2.4",
+    "next-auth": "^4.24.13",
+    "next-sanity": "^0.8.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-is": "^19.1.0",
+    "resend": "^6.9.4",
+    "sanity": "^2.36.6",
+    "stripe": "^20.4.1",
+    "styled-components": "^6.1.16",
+    "tailwindcss": "^4.0.17"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.5",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "@tailwindcss/postcss": "^4.2.2",
+    "autoprefixer": "^10.0.0",
+    "eslint": "^9.23.0",
+    "eslint-config-next": "^15.2.4",
+    "postcss": "^8.4.0",
+    "typescript": "5.8.2"
   }
 }

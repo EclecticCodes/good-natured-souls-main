@@ -1,7 +1,8 @@
 "use client";
 
+import React from "react";
+import config from "../../../sanityconfig"
 import { NextStudio } from "next-sanity/studio";
-import config from "@/types/sanity.config";
 
 type Props = {};
 

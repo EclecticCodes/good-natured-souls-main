@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Variants } from "framer-motion";
-import Icon from "@/app/Components/Icon";
+import Icon from "./Icon";
 
 type Project = {
   _id: string;

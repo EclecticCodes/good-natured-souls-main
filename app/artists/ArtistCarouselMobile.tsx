@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Artist } from "@/types/Artist";
+import { Artist } from "../../sanity/Artist";
 import { Variants } from "framer-motion";
 import Polaroid from "../Components/Polaroid";
 import Icon from "../Components/Icon";

@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getArtists } from "@/types/sanity/sanity-utils";
+import { getArtists } from "../../sanity/strapi-utils";
 import Polaroid from "../Components/Polaroid";
-import { Artist } from "@/types/Artist";
+import { Artist } from "../../sanity/Artist";
 import { motion, AnimatePresence } from "framer-motion";
 import ArtistCarouselMobile from "./ArtistCarouselMobile";
 
