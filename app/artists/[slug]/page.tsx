@@ -9,10 +9,11 @@ import Icon, { IconName } from "../../Components/Icon";
 import { PageWrapper } from "../../Components/PageWrapper";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
-const ArtistPage = async ({ params: { slug } }: Props) => {
+const ArtistPage = async ({ params }: Props) => {
+  const { slug } = await params;
   const { artist, projects } = await getArtistWithProjects(slug);
   console.log(artist);
 

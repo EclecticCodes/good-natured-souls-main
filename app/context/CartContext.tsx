@@ -6,7 +6,7 @@ export type CartItem = {
   name: string;
   price: number;
   quantity: number;
-  type: "digital" | "ticket" | "merch";
+  type: "digital" | "ticket" | "merch" | "vinyl" | "tees" | "hoodies" | "accessories";
 };
 
 type CartContextType = {

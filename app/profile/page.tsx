@@ -13,7 +13,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [orders, setOrders] = useState<any[]>([]);
-  const [notifications, setNotifications] = useState([
+  const [notifications, setNotifications] = useState<{id:number;message:string;date:string;read:boolean;type:string;link?:string;linkLabel?:string}[]>([
     { id: 1, message: "Welcome to Good Natured Souls!", date: "Today", read: false, type: "welcome" },
     { id: 2, message: "New release: STILL ALIVE. by Prince Inspiration", date: "Mar 18, 2026", read: false, type: "release" },
     { id: 3, message: "Eclectic Sage is performing at Secret Pour", date: "Mar 18, 2026", read: true, type: "show" },

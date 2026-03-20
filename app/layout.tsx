@@ -10,7 +10,6 @@ import "./globals.css";
 import Footer from "./Components/Footer";
 import Marquee from "./marquee";
 import { AnimatePresence, motion } from "framer-motion";
-import { delay } from "sanity/migrate";
 import Providers from "./Components/Providers";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });

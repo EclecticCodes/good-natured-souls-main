@@ -24,7 +24,8 @@ type Article = {
   relatedArtist?: string;
 };
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
+export default function ArticlePage({ params }: any) {
+  const { slug } = params;
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -33,7 +34,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
     const fetchArticle = async () => {
       try {
         const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-        const res = await fetch(`${strapiUrl}/api/articles?filters[slug][$eq]=${params.slug}&populate=coverImage,relatedArtist`);
+        const res = await fetch(`${strapiUrl}/api/articles?filters[slug][$eq]=${slug}&populate=coverImage,relatedArtist`);
         if (!res.ok) { setNotFound(true); setLoading(false); return; }
         const json = await res.json();
         const item = json.data?.[0];
@@ -63,7 +64,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
       setLoading(false);
     };
     fetchArticle();
-  }, [params.slug]);
+  }, [slug]);
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
