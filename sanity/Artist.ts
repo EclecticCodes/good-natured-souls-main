@@ -8,6 +8,7 @@ export type SocialMediaLink = {
 export type Artist = {
   _id: string;
   _createdAt: string;
+  artistType?: "roster" | "affiliate" | "spotlight";
   name: string;
   slug?: string;
   profileImage: string;

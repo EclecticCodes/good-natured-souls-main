@@ -24,7 +24,8 @@ type Article = {
   relatedArtist?: string;
 };
 
-export default function ArticlePage({ params }: any) {
+export default function ArticlePage({ params: paramsRaw }: any) {
+ const params = React.use(paramsRaw);
   const { slug } = params;
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);

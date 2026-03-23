@@ -1,109 +1,140 @@
 "use client";
-
 import React, { useState } from "react";
-import { Artist } from "../../sanity/Artist";
 import Polaroid from "./Polaroid";
 import Icon from "./Icon";
 import { motion, AnimatePresence } from "framer-motion";
+
+type Artist = {
+  _id: string;
+  name: string;
+  slug: string;
+  signature: string;
+  profileImage: string;
+  backgroundImage?: string;
+};
 
 type Props = {
   artists: Artist[];
 };
 
 const FeaturedArtists = ({ artists }: Props) => {
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"prev" | "next">("next");
+  const [transitioning, setTransitioning] = useState(false);
 
-  const handleNextClick = () => {
-    setDirection("next");
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % artists.length);
+  if (!artists || artists.length === 0) return null;
+
+  const goTo = (newIndex: number, dir: "prev" | "next") => {
+    if (transitioning) return;
+    setTransitioning(true);
+    setDirection(dir);
+    setTimeout(() => {
+      setCurrentIndex(newIndex);
+      setTransitioning(false);
+    }, 400);
   };
 
-  const handlePrevClick = () => {
-    setDirection("prev");
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? artists.length - 1 : prevIndex - 1
-    );
-  };
+  const handleNext = () =>
+    goTo((currentIndex + 1) % artists.length, "next");
 
-  const variants = {
-    enter: (direction: "prev" | "next") => ({
-      x: direction === "next" ? 100 : -100,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: "prev" | "next") => ({
-      x: direction === "next" ? -100 : 100,
-      opacity: 0,
-    }),
-  };
+  const handlePrev = () =>
+    goTo(currentIndex === 0 ? artists.length - 1 : currentIndex - 1, "prev");
+
+  const current = artists[currentIndex];
 
   return (
-    <>
-      {artists && artists.length > 0 && (
-        <section className="p-8 flex flex-col gap-4 justify-center items-center">
-          <h2 className="font-bold text-4xl pb-12">FEATURED ARTISTS</h2>
-          <div className="flex flex-col gap-4 justify-center items-center">
-            <AnimatePresence initial={false} custom={direction} mode="wait">
-              <motion.div
-                key={currentIndex}
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.4 }}
-                className="flex flex-col gap-4 justify-center items-center"
-              >
-                <Polaroid
-                  profileImage={artists[currentIndex].profileImage}
-                  signature={artists[currentIndex].signature}
-                />
-                <h3 className="font-bold text-2xl">
-                  {artists[currentIndex].name.toUpperCase()}
-                </h3>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <div className="flex flex-col gap-4 md:w-1/3 w-full">
-            <div className="text-center">
-              <motion.a
-                className="inline-block underline font-thin hover:text-accent"
-                href="/artists"
-                whileHover={{ scale: 1.05 }}
-              >
-                VIEW ALL ARTISTS
-              </motion.a>
-            </div>
-            <div className="flex justify-around items-center">
-              <motion.button
-                onClick={handlePrevClick}
-                className="p-2 bg-text rounded-sm"
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.8 }}
-              >
-                <Icon name="arrowLeft" color="black" />
-              </motion.button>
-              <span className="text-xl gap-8">
-                <span>{currentIndex + 1}</span> <span>/</span>{" "}
-                <span>{artists.length}</span>
-              </span>
-              <motion.button
-                onClick={handleNextClick}
-                className="p-2 bg-text rounded-sm "
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.8 }}
-              >
-                <Icon name="arrowRight" color="black" />
-              </motion.button>
-            </div>
-          </div>
-        </section>
+    <section className="py-16 px-4 flex flex-col gap-6 justify-center items-center">
+      <div className="flex items-center justify-between w-full max-w-5xl mb-4">
+        <h2 className="font-oswald text-2xl md:text-4xl font-bold">FEATURED ARTISTS</h2>
+        <motion.a
+          href="/artists"
+          className="font-oswald text-xs tracking-widest text-accent hover:underline shrink-0 ml-4"
+          whileHover={{ scale: 1.05 }}
+        >
+          VIEW ALL ARTISTS
+        </motion.a>
+      </div>
+
+      <div className="flex flex-col gap-4 justify-center items-center relative">
+        {/* Blur/black overlay during transition */}
+        <AnimatePresence>
+          {transitioning && (
+            <motion.div
+              key="transition-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="absolute inset-0 z-10 backdrop-blur-md bg-black/60 rounded-sm"
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Artist card */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, scale: 0.97, filter: "blur(8px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.97, filter: "blur(8px)" }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="flex flex-col gap-4 justify-center items-center"
+          >
+            <a href={`/artists/${current.slug}`}>
+              <Polaroid
+                profileImage={current.profileImage}
+                signature={current.signature}
+              />
+            </a>
+            <a href={`/artists/${current.slug}`}>
+              <h3 className="font-oswald font-bold text-xl md:text-2xl tracking-widest hover:text-accent transition-colors">
+                {current.name.toUpperCase()}
+              </h3>
+            </a>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Controls */}
+      <div className="flex justify-around items-center gap-8 mt-2">
+        <motion.button
+          onClick={handlePrev}
+          className="p-2 bg-text rounded-sm disabled:opacity-30"
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.8 }}
+          disabled={transitioning}
+        >
+          <Icon name="arrowLeft" color="black" />
+        </motion.button>
+        <span className="font-oswald text-xl">
+          {currentIndex + 1} / {artists.length}
+        </span>
+        <motion.button
+          onClick={handleNext}
+          className="p-2 bg-text rounded-sm disabled:opacity-30"
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.8 }}
+          disabled={transitioning}
+        >
+          <Icon name="arrowRight" color="black" />
+        </motion.button>
+      </div>
+
+      {/* Dot indicators */}
+      {artists.length > 1 && (
+        <div className="flex gap-2 mt-2">
+          {artists.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i, i > currentIndex ? "next" : "prev")}
+              className={`h-1.5 rounded-full transition-all duration-500 ${
+                i === currentIndex ? "bg-accent w-6" : "bg-white/30 w-2"
+              }`}
+            />
+          ))}
+        </div>
       )}
-    </>
+    </section>
   );
 };
 
