@@ -97,7 +97,7 @@ const Marquee = ({ section = "global" }: Props) => {
 
   // Fall back to defaults if no items match this section
   const displayItems = sectionItems.length > 0 ? sectionItems : DEFAULT_ITEMS;
-  const featuredItems = displayItems.filter((i) => i.featured);
+  const featuredItems = displayItems.filter((i) => i.featured && (i.section === section || i.section === "global") && sectionItems.length > 0);
 
   useEffect(() => {
     if (featuredItems.length <= 1) return;
