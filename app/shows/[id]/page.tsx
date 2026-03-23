@@ -134,6 +134,14 @@ export default function ShowPage({ params }: any) {
     const fetchShow = async () => {
       try {
         const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+
+// Handles both local Strapi URLs and absolute Cloudinary URLs
+const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${strapiUrl}${url}`;
+};
+
         const res = await fetch(`${strapiUrl}/api/shows/${params.id}?populate=flyer`);
         if (!res.ok) { setNotFound(true); setLoading(false); return; }
         const json = await res.json();
@@ -151,7 +159,7 @@ export default function ShowPage({ params }: any) {
           soldOut: item.attributes.soldOut || false,
           description: item.attributes.description || null,
           flyer: item.attributes.flyer?.data?.attributes?.url
-            ? `${strapiUrl}${item.attributes.flyer.data.attributes.url}`
+            ? resolveUrl(item.attributes.flyer.data.attributes.url, strapiUrl)
             : null,
         });
       } catch { setNotFound(true); }

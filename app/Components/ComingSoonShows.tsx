@@ -49,6 +49,14 @@ const ShowsComponent = () => {
     const fetchShows = async () => {
       try {
         const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+
+// Handles both local Strapi URLs and absolute Cloudinary URLs
+const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${strapiUrl}${url}`;
+};
+
         const res = await fetch(`${strapiUrl}/api/shows?sort=date:asc&populate=flyer&publicationState=live`);
         if (res.ok) {
           const json = await res.json();
@@ -64,7 +72,7 @@ const ShowsComponent = () => {
             ticketPlatform: item.attributes.ticketPlatform || 'stripe',
             soldOut: item.attributes.soldOut || false,
             flyer: item.attributes.flyer?.data?.attributes?.url
-              ? `${strapiUrl}${item.attributes.flyer.data.attributes.url}`
+              ? resolveUrl(item.attributes.flyer.data.attributes.url, strapiUrl)
               : null,
             source: 'strapi' as const,
           }));

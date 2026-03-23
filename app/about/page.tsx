@@ -45,7 +45,15 @@ export default function AboutPage() {
   const [rosterArtists, setRosterArtists] = useState<ArtistData[]>([]);
 
   useEffect(() => {
-    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+
+// Handles both local Strapi URLs and absolute Cloudinary URLs
+const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${strapiUrl}${url}`;
+};
+
     fetch(`${strapiUrl}/api/artists?populate=profileImage&sort=orderRank:asc`)
       .then((r) => r.json())
       .then((json) => {
@@ -55,7 +63,7 @@ export default function AboutPage() {
             name: item.attributes.name,
             slug: item.attributes.slug,
             profileImage: item.attributes.profileImage?.data?.attributes?.url
-              ? `${strapiUrl}${item.attributes.profileImage.data.attributes.url}` : "",
+              ? resolveUrl(item.attributes.profileImage.data.attributes.url, strapiUrl) : "",
             artistType: item.attributes.artistType || "roster",
           }))
         );

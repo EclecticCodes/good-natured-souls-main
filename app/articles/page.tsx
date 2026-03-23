@@ -27,7 +27,15 @@ export default function ArticlesPage() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+        const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+
+// Handles both local Strapi URLs and absolute Cloudinary URLs
+const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${strapiUrl}${url}`;
+};
+
         const res = await fetch(`${strapiUrl}/api/articles?sort=isFeatured:desc,publishedAt:desc&populate=coverImage,relatedArtist`);
         if (!res.ok) { setLoading(false); return; }
         const json = await res.json();
@@ -50,7 +58,7 @@ export default function ArticlesPage() {
           readTime: item.attributes.readTime || 3,
           category: item.attributes.category || "News",
           coverImage: item.attributes.coverImage?.data?.attributes?.url
-            ? `${strapiUrl}${item.attributes.coverImage.data.attributes.url}`
+            ? resolveUrl(item.attributes.coverImage.data.attributes.url, strapiUrl)
             : undefined,
         })));
       } catch {}

@@ -72,7 +72,15 @@ const Navbar = () => {
   const isHome = pathname === "/";
 
   useEffect(() => {
-    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+
+// Handles both local Strapi URLs and absolute Cloudinary URLs
+const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${strapiUrl}${url}`;
+};
+
     fetch(`${strapiUrl}/api/artists?populate=profileImage,backgroundImage&sort=orderRank:asc`)
       .then((r) => r.json())
       .then((json) => {
@@ -81,9 +89,9 @@ const Navbar = () => {
           name: item.attributes.name,
           slug: item.attributes.slug,
           profileImage: item.attributes.backgroundImage?.data?.attributes?.url
-            ? `${strapiUrl}${item.attributes.backgroundImage.data.attributes.url}`
+            ? resolveUrl(item.attributes.backgroundImage.data.attributes.url, strapiUrl)
             : item.attributes.profileImage?.data?.attributes?.url
-            ? `${strapiUrl}${item.attributes.profileImage.data.attributes.url}`
+            ? resolveUrl(item.attributes.profileImage.data.attributes.url, strapiUrl)
             : "",
         })));
       })
@@ -99,7 +107,7 @@ const Navbar = () => {
             artist: item.attributes.artist?.data?.attributes?.name || "",
             url: item.attributes.url || "#",
             coverImageUrl: item.attributes.cover?.data?.attributes?.url
-              ? `${strapiUrl}${item.attributes.cover.data.attributes.url}`
+              ? resolveUrl(item.attributes.cover.data.attributes.url, strapiUrl)
               : "",
           });
         }
