@@ -102,7 +102,7 @@ export default async function Home() {
         {sections.map((section, i) => (
           <div key={section.key}>
             {section.content}
-            {i < sections.length - 1 && (
+            {i < sections.length - 2 && (
               <Marquee section={sections[i + 1].section as any} />
             )}
           </div>
