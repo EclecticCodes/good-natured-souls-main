@@ -108,14 +108,27 @@ export default async function Home() {
     }] : []),
   ];
 
+  // Deduplicate consecutive marquees — if two sections in a row both want
+  // a marquee and neither has section-specific content, only the first renders.
+  // We track this by suppressing showMarqueeAfter on a section if the next
+  // section also has showMarqueeAfter true and they share the same section key.
+  const dedupedSections = sections.map((section, i) => {
+    if (!section.showMarqueeAfter) return section;
+    const next = sections[i + 1];
+    if (next && next.showMarqueeAfter && next.section === section.section) {
+      return { ...section, showMarqueeAfter: false };
+    }
+    return section;
+  });
+
   return (
     <main>
       <PageWrapper>
-        {sections.map((section, i) => (
+        {dedupedSections.map((section, i) => (
           <div key={section.key}>
             {section.content}
             {section.showMarqueeAfter && (
-              <Marquee section={sections[i + 1]?.section as any ?? section.section} />
+              <Marquee section={dedupedSections[i + 1]?.section as any ?? section.section} />
             )}
           </div>
         ))}
