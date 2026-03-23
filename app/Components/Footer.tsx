@@ -1,5 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
+import NewsletterStrip from "./NewsletterStrip";
 
 const footerLinks = [
   {
@@ -39,6 +40,8 @@ const Footer = () => {
   if (pathname.startsWith("/admin")) return null;
 
   return (
+    <>
+    <NewsletterStrip />
     <footer className="bg-primary border-t border-secondaryInteraction pt-12 pb-6">
       <div className="max-w-screen-xl mx-auto px-4">
 
@@ -97,6 +100,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+    </>
   );
 };
 

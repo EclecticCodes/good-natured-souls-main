@@ -10,6 +10,7 @@ import ArtistSpotlight from "./Components/ArtistSpotlight";
 import ParallaxSection from "./Components/ParallaxSection";
 import { PageWrapper } from "./Components/PageWrapper";
 import Marquee from "./marquee";
+import NewsletterPopup from "./Components/NewsletterPopup";
 import React from "react";
 
 export const metadata: Metadata = {
@@ -123,6 +124,7 @@ export default async function Home() {
 
   return (
     <main>
+      <NewsletterPopup />
       <PageWrapper>
         {dedupedSections.map((section, i) => (
           <div key={section.key}>
