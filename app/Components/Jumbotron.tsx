@@ -3,10 +3,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 
 const LOCAL_VIDEOS = [
-  "/images/GoodLuckVid.mp4",
-  "/images/RUTS.mp4",
-  "/images/Still Alive.mp4",
-  "/images/Tricks with my heart.mp4",
+  "https://res.cloudinary.com/good-natured-souls-gns/video/upload/v1774240995/videoplayback_1_h8hbxf.mp4",
+  "https://res.cloudinary.com/good-natured-souls-gns/video/upload/v1774240921/videoplayback_2_sgickn.mp4",
+  "https://res.cloudinary.com/good-natured-souls-gns/video/upload/v1774241162/videoplayback_dxyagt.mp4",
 ];
 
 const LOCAL_IMAGES = [
