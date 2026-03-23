@@ -31,10 +31,16 @@ export default async function Home() {
   const hasArtists = artists && artists.length > 0;
   const hasProjects = featuredProjects && featuredProjects.length > 0;
 
-  const sections: { key: string; section: string; content: React.ReactNode }[] = [
+  const sections: {
+    key: string;
+    section: string;
+    showMarqueeAfter: boolean;
+    content: React.ReactNode;
+  }[] = [
     {
       key: "jumbotron",
       section: "jumbotron",
+      showMarqueeAfter: true,
       content: (
         <Jumbotron
           images={jumbotronImages}
@@ -47,6 +53,7 @@ export default async function Home() {
     {
       key: "description",
       section: "description",
+      showMarqueeAfter: true,
       content: (
         <ParallaxSection strength={40}>
           <Description bio={bio} />
@@ -56,6 +63,7 @@ export default async function Home() {
     ...(hasProjects ? [{
       key: "newmusic",
       section: "newmusic",
+      showMarqueeAfter: true,
       content: (
         <ParallaxSection strength={30}>
           <NewMusic projects={featuredProjects} />
@@ -65,6 +73,7 @@ export default async function Home() {
     ...(hasArtists ? [{
       key: "artists",
       section: "artists",
+      showMarqueeAfter: true,
       content: (
         <ParallaxSection strength={30}>
           <FeaturedArtists artists={artists} />
@@ -74,11 +83,13 @@ export default async function Home() {
     {
       key: "spotlight",
       section: "artists",
+      showMarqueeAfter: true,
       content: <ArtistSpotlight />,
     },
     {
       key: "shows",
       section: "shows",
+      showMarqueeAfter: false,
       content: (
         <ParallaxSection strength={25}>
           <FeaturedShows />
@@ -88,6 +99,7 @@ export default async function Home() {
     ...(hasProjects ? [{
       key: "products",
       section: "products",
+      showMarqueeAfter: false,
       content: (
         <ParallaxSection strength={25}>
           <FeaturedProducts projects={featuredProjects} />
@@ -102,8 +114,8 @@ export default async function Home() {
         {sections.map((section, i) => (
           <div key={section.key}>
             {section.content}
-            {i < sections.length - 2 && (
-              <Marquee section={sections[i + 1].section as any} />
+            {section.showMarqueeAfter && (
+              <Marquee section={sections[i + 1]?.section as any ?? section.section} />
             )}
           </div>
         ))}
