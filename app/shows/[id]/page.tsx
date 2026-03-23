@@ -122,8 +122,7 @@ const PlatformEmbed = ({ platform, ticketUrl }: { platform: string; ticketUrl?: 
   return null;
 };
 
-export default function ShowPage({ params: paramsRaw }: any) {
- const params = React.use(paramsRaw);
+export default function ShowPage({ params }: any) {
   const { addItem, items } = useCart();
   const [show, setShow] = useState<Show | null>(null);
   const [loading, setLoading] = useState(true);
