@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import WishlistModal from './WishlistModal';
+import ProductDisplay3D from './ProductDisplay3D';
 import { useCart } from '../context/CartContext';
 
 type ProductType = 'digital' | 'vinyl' | 'tees' | 'hoodies' | 'accessories';
@@ -188,8 +189,8 @@ function ProductCard({ product }: { product: Product }) {
             onError={() => setCoverError(true)}
           />
         ) : (
-          <div className="w-32 h-32 rounded-full bg-secondary flex items-center justify-center border-4 border-secondaryInteraction">
-            <div className="w-10 h-10 rounded-full bg-accent" />
+          <div className="w-full h-full">
+            <ProductDisplay3D type={product.type} name={product.name} artist={product.artist} />
           </div>
         )}
         <span className="absolute top-3 left-3 bg-accent text-primary font-oswald text-xs font-bold px-2 py-1 tracking-widest">NEW</span>
