@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import WishlistModal from './WishlistModal';
 import { useCart } from '../context/CartContext';
 
 type ProductType = 'digital' | 'vinyl' | 'tees' | 'hoodies' | 'accessories';
@@ -161,7 +162,7 @@ function PlayerEmbed({ platform, url, coverImage, productName }: { platform: str
 function ProductCard({ product }: { product: Product }) {
   const { addItem, items } = useCart();
   const [wishlist, setWishlist] = useState(false);
-  const [wishlistEmail, setWishlistEmail] = useState('');
+  const [showWishlistModal, setShowWishlistModal] = useState(false);
   const [showAllTracks, setShowAllTracks] = useState(false);
   const [coverError, setCoverError] = useState(false);
   const availablePlatforms = Object.keys(product.previews || {}).filter(k => product.previews?.[k]);
@@ -170,21 +171,9 @@ function ProductCard({ product }: { product: Product }) {
   const displayTracks = showAllTracks ? product.tracks : product.tracks?.slice(0, 3);
   const hiddenCount = (product.tracks?.length || 0) - 3;
 
-  const handleWishlist = async () => {
-    const email = wishlistEmail || window.prompt('Enter your email to save to wishlist:');
-    if (!email || !email.includes('@')) return;
-    await fetch('/api/wishlist', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, productId: product.id, productName: product.name, consentGiven: true, consentTimestamp: new Date().toISOString() }),
-    });
-    setWishlist(true);
-    setWishlistEmail(email);
-    try {
-      const existing = JSON.parse(localStorage.getItem('gns-wishlist') || '[]');
-      existing.push({ id: product.id, name: product.name, type: product.type, price: product.price });
-      localStorage.setItem('gns-wishlist', JSON.stringify(existing));
-    } catch {}
+  const handleWishlist = () => {
+    if (wishlist) return;
+    setShowWishlistModal(true);
   };
 
   return (
@@ -293,6 +282,13 @@ function ProductCard({ product }: { product: Product }) {
           {wishlist ? 'SAVED TO WISHLIST' : 'ADD TO WISHLIST'}
         </button>
       </div>
+      {showWishlistModal && (
+        <WishlistModal
+          product={{ id: product.id, name: product.name, type: product.type, price: product.price }}
+          onClose={() => setShowWishlistModal(false)}
+          onSaved={() => { setWishlist(true); setShowWishlistModal(false); }}
+        />
+      )}
     </div>
   );
 }
