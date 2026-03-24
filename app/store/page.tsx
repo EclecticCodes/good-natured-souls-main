@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { PageWrapper } from '../Components/PageWrapper';
 import Header from '../Components/Header';
 import ComingSoonStore from '../Components/ComingSoonStore';
@@ -20,21 +20,22 @@ export default async function StorePage({ searchParams }: { searchParams: Promis
 
   return (
     <PageWrapper>
-      <main className='min-h-screen'>
+      <main className="min-h-screen">
         <Header>
-          <h1 className='text-4xl font-bold font-oswald'>Store</h1>
+          <h1 className="text-4xl font-bold font-oswald">Store</h1>
         </Header>
-        <div className='border-b border-secondaryInteraction overflow-x-auto'>
-          <div className='max-w-5xl mx-auto px-4 flex gap-0'>
-            {categories.map((cat) => (
-              
-                key={cat.key}
-                href={cat.key === 'all' ? '/store' : '/store?category=' + cat.key}
-                className={'font-oswald text-sm tracking-widest px-5 py-4 border-b-2 whitespace-nowrap transition-colors ' + (active === cat.key ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-white')}
-              >
-                {cat.label.toUpperCase()}
-              </a>
-            ))}
+        <div className="border-b border-secondaryInteraction overflow-x-auto">
+          <div className="max-w-5xl mx-auto px-4 flex gap-0">
+            {categories.map((cat) => {
+              const isActive = active === cat.key;
+              const href = cat.key === 'all' ? '/store' : '/store?category=' + cat.key;
+              const cls = 'font-oswald text-sm tracking-widest px-5 py-4 border-b-2 whitespace-nowrap transition-colors ' + (isActive ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-white');
+              return (
+                <a key={cat.key} href={href} className={cls}>
+                  {cat.label.toUpperCase()}
+                </a>
+              );
+            })}
           </div>
         </div>
         <ComingSoonStore activeCategory={active} strapiProducts={products} />
