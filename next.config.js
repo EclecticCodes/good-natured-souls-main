@@ -12,6 +12,19 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      { source: '/store', destination: '/', permanent: false },
+      { source: '/store/:path*', destination: '/', permanent: false },
+      { source: '/fanclub', destination: '/', permanent: false },
+      { source: '/fanclub/:path*', destination: '/', permanent: false },
+      { source: '/articles', destination: '/', permanent: false },
+      { source: '/articles/:path*', destination: '/', permanent: false },
+      { source: '/checkout', destination: '/', permanent: false },
+      { source: '/checkout/:path*', destination: '/', permanent: false },
+      { source: '/shows', destination: '/', permanent: false },
+      { source: '/shows/:path*', destination: '/', permanent: false },
+    ];
+  },
 };
-
 module.exports = nextConfig;

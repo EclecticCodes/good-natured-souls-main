@@ -8,10 +8,10 @@ import { useSession, signOut } from "next-auth/react";
 const headers = [
   { key: "home", name: "Home", route: "/" },
   { key: "artists", name: "Artists", route: "/artists" },
-  { key: "shows", name: "Shows", route: "/shows" },
-  { key: "store", name: "Store", route: "/store" },
-  { key: "articles", name: "Articles", route: "/articles" },
-  { key: "fanclub", name: "Fan Club", route: "/fanclub" },
+  // { key: "shows", name: "Shows", route: "/shows" },
+  // { key: "store", name: "Store", route: "/store" },
+  // { key: "articles", name: "Articles", route: "/articles" },
+  // { key: "fanclub", name: "Fan Club", route: "/fanclub" },
   { key: "about", name: "About", route: "/about" },
 ];
 
@@ -169,15 +169,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
           </ul>
 
           <div className="flex items-center gap-3">
-            <motion.a href="/checkout" className="relative p-2 hover:text-accent transition-colors" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-              </svg>
-              {count > 0 && (
-                <span className="absolute -top-1 -right-1 bg-accent text-primary text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">{count}</span>
-              )}
-            </motion.a>
+{/* Cart hidden while store is in development */}
 
             <div className="hidden md:flex items-center gap-2">
               {session ? (
