@@ -297,8 +297,32 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-const StoreComponent = ({ activeCategory = 'all' }: { activeCategory?: string }) => {
-  const filtered = activeCategory === 'all' ? products : products.filter(p => p.type === activeCategory);
+const StoreComponent = ({ activeCategory = 'all', strapiProducts = [] }: { activeCategory?: string; strapiProducts?: any[] }) => {
+  // Merge Strapi products with hardcoded — Strapi takes priority, hardcoded fills gaps
+  const allProducts: Product[] = strapiProducts.length > 0
+    ? strapiProducts.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        artist: p.artist,
+        price: p.price,
+        type: p.category as ProductType,
+        meta: p.description || `${p.tracks?.length || 0} tracks · ${p.artist}`,
+        coverImage: p.coverImage || undefined,
+        previews: {
+          ...(p.spotifyUrl && { spotify: p.spotifyUrl }),
+          ...(p.appleMusicUrl && { apple: p.appleMusicUrl }),
+          ...(p.youtubeUrl && { youtube: p.youtubeUrl }),
+          ...(p.soundcloudUrl && { soundcloud: p.soundcloudUrl }),
+          ...(p.bandcampUrl && { bandcamp: p.bandcampUrl }),
+          ...(p.tidalUrl && { tidal: p.tidalUrl }),
+          ...(p.amazonUrl && { amazon: p.amazonUrl }),
+          ...(p.deezerUrl && { deezer: p.deezerUrl }),
+          ...(p.mp3Url && { mp3: p.mp3Url }),
+        },
+        tracks: p.tracks || [],
+      }))
+    : products;
+  const filtered = activeCategory === 'all' ? allProducts : allProducts.filter(p => p.type === activeCategory);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [subscribed, setSubscribed] = useState(false);

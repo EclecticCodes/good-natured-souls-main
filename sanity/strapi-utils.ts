@@ -150,3 +150,55 @@ export async function getHomePageData() {
     };
   }
 }
+
+export async function getProducts() {
+  try {
+    const res = await fetch(
+      `${STRAPI_URL}/api/products?populate=images,artist,tracks&sort=orderRank:asc&filters[active][$eq]=true`,
+      { cache: 'no-store' }
+    );
+    if (!res.ok) return [];
+    const json = await res.json();
+    return (json.data || []).map((item: any) => {
+      const attrs = item.attributes;
+      const images = (attrs.images?.data || []).map((img: any) => resolveUrl(img.attributes.url));
+      return {
+        id: String(item.id),
+        name: attrs.name || '',
+        slug: attrs.slug || String(item.id),
+        description: attrs.description || '',
+        price: attrs.price || 0,
+        comparePrice: attrs.comparePrice || null,
+        category: attrs.category || 'digital',
+        status: attrs.status || 'available',
+        releaseDate: attrs.releaseDate || null,
+        stock: attrs.stock || 0,
+        unlimited: attrs.unlimited || false,
+        featured: attrs.featured || false,
+        coverImage: images[0] || '',
+        images,
+        artist: attrs.artist?.data?.attributes?.name || '',
+        artistSlug: attrs.artist?.data?.attributes?.slug || '',
+        spotifyUrl: attrs.spotifyUrl || null,
+        appleMusicUrl: attrs.appleMusicUrl || null,
+        youtubeUrl: attrs.youtubeUrl || null,
+        soundcloudUrl: attrs.soundcloudUrl || null,
+        bandcampUrl: attrs.bandcampUrl || null,
+        tidalUrl: attrs.tidalUrl || null,
+        amazonUrl: attrs.amazonUrl || null,
+        deezerUrl: attrs.deezerUrl || null,
+        mp3Url: attrs.mp3Url || null,
+        sizes: attrs.sizes ? attrs.sizes.split(',').map((s: string) => s.trim()) : [],
+        colors: attrs.colors ? attrs.colors.split(',').map((c: string) => c.trim()) : [],
+        tracks: (attrs.tracks || []).map((t: any) => ({
+          num: t.trackNumber || t.num,
+          name: t.title || t.name,
+          dur: t.duration || t.dur,
+          featuring: t.featuring || null,
+        })),
+      };
+    });
+  } catch {
+    return [];
+  }
+}
