@@ -25,7 +25,10 @@ type Article = {
 };
 
 export default function ArticlePage({ params }: any) {
-  const { slug } = params;
+  const [slug, setSlug] = useState<string>('');
+  useEffect(() => {
+    Promise.resolve(params).then((p: any) => setSlug(p.slug));
+  }, [params]);
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -73,6 +76,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
     };
     fetchArticle();
   }, [slug]);
+  if (!slug) return null;
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });

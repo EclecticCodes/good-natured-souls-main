@@ -122,7 +122,11 @@ const PlatformEmbed = ({ platform, ticketUrl }: { platform: string; ticketUrl?: 
   return null;
 };
 
-export default function ShowPage({ params }: any) {
+export default function ShowPage({ params: paramsRaw }: any) {
+  const [resolvedId, setResolvedId] = useState<string>('');
+  useEffect(() => {
+    Promise.resolve(paramsRaw).then((p: any) => setResolvedId(p.id));
+  }, [paramsRaw]);
   const { addItem, items } = useCart();
   const [show, setShow] = useState<Show | null>(null);
   const [loading, setLoading] = useState(true);
@@ -142,7 +146,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
   return `${strapiUrl}${url}`;
 };
 
-        const res = await fetch(`${strapiUrl}/api/shows/${params.id}?populate=flyer`);
+        const res = await fetch(`${strapiUrl}/api/shows/${resolvedId}?populate=flyer`);
         if (!res.ok) { setNotFound(true); setLoading(false); return; }
         const json = await res.json();
         const item = json.data;
@@ -166,7 +170,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
       setLoading(false);
     };
     fetchShow();
-  }, [params.id]);
+  }, [resolvedId]);
 
   const handleBuyTicket = () => {
     if (!show || show.soldOut) return;
