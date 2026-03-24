@@ -95,7 +95,7 @@ export default function WishlistModal({ product, onClose, onSaved }: Props) {
                 >
                   SIGN IN TO SAVE
                 </button>
-                
+                <a
                   href="/auth/signup"
                   className="block w-full text-center border border-secondaryInteraction text-gray-400 font-oswald text-sm py-3 tracking-widest hover:border-accent hover:text-accent transition-colors"
                 >
