@@ -154,7 +154,7 @@ export async function getHomePageData() {
 export async function getProducts() {
   try {
     const res = await fetch(
-      `${STRAPI_URL}/api/products?populate=images,artist,tracks&sort=orderRank:asc&filters[active][$eq]=true`,
+      `${STRAPI_URL}/api/products?populate=images,artist,tracks&sort=orderRank:asc&filters[status][$ne]=archived`,
       { cache: 'no-store' }
     );
     if (!res.ok) return [];
