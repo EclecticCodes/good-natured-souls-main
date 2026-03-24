@@ -218,12 +218,13 @@ const Jumbotron = ({ images, headline, tagline }: Props) => {
           <a href="/artists" className="font-oswald font-bold text-sm tracking-widest px-8 py-4 bg-accent text-primary hover:bg-accentInteraction transition-colors duration-300 text-center">
             OUR ARTISTS
           </a>
-          <a href="/shows" className="font-oswald font-bold text-sm tracking-widest px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-primary transition-colors duration-300 text-center">
+          {/* Shows and Store hidden while in development */}
+          {false && <a href="/shows" className="font-oswald font-bold text-sm tracking-widest px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-primary transition-colors duration-300 text-center">
             UPCOMING SHOWS
-          </a>
-          <a href="/store" className="font-oswald font-bold text-sm tracking-widest px-8 py-4 border-2 border-accent text-accent hover:bg-accent hover:text-primary transition-colors duration-300 text-center">
+          </a>}
+          {false && <a href="/store" className="font-oswald font-bold text-sm tracking-widest px-8 py-4 border-2 border-accent text-accent hover:bg-accent hover:text-primary transition-colors duration-300 text-center">
             SHOP
-          </a>
+          </a>}
         </motion.div>
 
         {/* HD indicator */}
