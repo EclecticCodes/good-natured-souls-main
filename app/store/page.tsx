@@ -3,7 +3,6 @@ import { PageWrapper } from '../Components/PageWrapper';
 import Header from '../Components/Header';
 import ComingSoonStore from '../Components/ComingSoonStore';
 import { getProducts } from '../../sanity/strapi-utils';
-import { useSearchParams } from 'next/navigation';
 
 const categories = [
   { key: 'all', label: 'All' },
@@ -14,39 +13,31 @@ const categories = [
   { key: 'accessories', label: 'Accessories' },
 ];
 
-async function StoreContent({ activeCategory }: { activeCategory: string }) {
+export default async function StorePage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+  const params = await searchParams;
+  const active = params?.category || 'all';
   const products = await getProducts();
-  return (
-    <div>
-      <div className='border-b border-secondaryInteraction overflow-x-auto'>
-        <div className='max-w-5xl mx-auto px-4 flex gap-0'>
-          {categories.map((cat) => (
-            
-              key={cat.key}
-              href={cat.key === 'all' ? '/store' : '/store?category=' + cat.key}
-              className={'font-oswald text-sm tracking-widest px-5 py-4 border-b-2 whitespace-nowrap transition-colors ' + (activeCategory === cat.key ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-white')}
-            >
-              {cat.label.toUpperCase()}
-            </a>
-          ))}
-        </div>
-      </div>
-      <ComingSoonStore activeCategory={activeCategory} strapiProducts={products} />
-    </div>
-  );
-}
 
-export default async function StorePage({ searchParams }: { searchParams: { category?: string } }) {
-  const active = searchParams?.category || 'all';
   return (
     <PageWrapper>
       <main className='min-h-screen'>
         <Header>
           <h1 className='text-4xl font-bold font-oswald'>Store</h1>
         </Header>
-        <Suspense fallback={<div className='text-center py-16 font-oswald text-gray-500 tracking-widest'>LOADING...</div>}>
-          <StoreContent activeCategory={active} />
-        </Suspense>
+        <div className='border-b border-secondaryInteraction overflow-x-auto'>
+          <div className='max-w-5xl mx-auto px-4 flex gap-0'>
+            {categories.map((cat) => (
+              
+                key={cat.key}
+                href={cat.key === 'all' ? '/store' : '/store?category=' + cat.key}
+                className={'font-oswald text-sm tracking-widest px-5 py-4 border-b-2 whitespace-nowrap transition-colors ' + (active === cat.key ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-white')}
+              >
+                {cat.label.toUpperCase()}
+              </a>
+            ))}
+          </div>
+        </div>
+        <ComingSoonStore activeCategory={active} strapiProducts={products} />
       </main>
     </PageWrapper>
   );
