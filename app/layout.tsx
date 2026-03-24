@@ -11,6 +11,7 @@ import Footer from "./Components/Footer";
 import Marquee from "./marquee";
 import { AnimatePresence, motion } from "framer-motion";
 import Providers from "./Components/Providers";
+import PageTransition from "./Components/PageTransition";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const ericaOne = Erica_One({
@@ -55,7 +56,7 @@ export default function RootLayout({
 
         <Providers>
         
-        {children}
+        <PageTransition>{children}</PageTransition>
         <Footer />
       </Providers>
     </body>

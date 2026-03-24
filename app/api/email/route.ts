@@ -12,7 +12,7 @@ const EMAILS = {
   licensing: 'licensing@goodnaturedsouls.com',
   fanclub: 'fanclub@goodnaturedsouls.com',
   support: 'support@goodnaturedsouls.com',
-  newsletter: 'Good Natured Souls <info@goodnaturedsouls.com>',
+  newsletter: 'Good Natured Souls <newsletter@goodnaturedsouls.com>',
 };
 
 async function saveInquiryToStrapi(data: { name: string; email: string; subject: string; message: string }) {
