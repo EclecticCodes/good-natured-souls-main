@@ -5,6 +5,7 @@ type Props = {
   type: string;
   name: string;
   artist: string;
+  coverImage?: string;
 };
 
 export default function ProductDisplay3D({ type, name, artist }: Props) {
@@ -123,7 +124,7 @@ function VinylDisplay({ id, name, artist }: { id: string; name: string; artist: 
   );
 }
 
-function DigitalDisplay({ id, name, artist }: { id: string; name: string; artist: string }) {
+function DigitalDisplay({ id, name, artist, coverImage }: { id: string; name: string; artist: string; coverImage?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
@@ -135,7 +136,41 @@ function DigitalDisplay({ id, name, artist }: { id: string; name: string; artist
     const lx=Math.floor(W*0.41),ly=Math.floor(H*0.19),lw=Math.floor(W*0.18),lh=Math.floor(H*0.06);
     let fragments:any[]=[],state='assembling',frame=0,glowPhase=0,mouseX=W/2,mouseY=H/2,isHovering=false;
     function build(){ fragments=[]; for(let x=bx;x<bx+bw;x+=PS){ for(let y=by;y<by+bh;y+=PS){ const isLed=x>=lx&&x<lx+lw&&y>=ly&&y<ly+lh; const isConn=x>=cx&&x<cx+cw&&y>=cy&&y<cy+ch; const color=isLed?GOLD:isConn?LGRAY:(Math.random()>0.3?DGRAY:LGRAY); fragments.push({tx:x,ty:y,x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,color,alpha:0,delay:Math.random()*40,fp:Math.random()*Math.PI*2,fs:0.4+Math.random()*0.6,rebel:Math.random()<0.3}); } } }
-    function drawUSB(){ ctx.fillStyle=DGRAY;ctx.fillRect(bx,by,bw,bh);ctx.strokeStyle=LGRAY;ctx.lineWidth=1;ctx.strokeRect(bx,by,bw,bh);ctx.fillStyle=LGRAY;ctx.fillRect(cx,cy,cw,ch);ctx.strokeStyle='#3a3a3a';ctx.strokeRect(cx,cy,cw,ch);ctx.fillStyle='#444';ctx.fillRect(cx+3,cy+3,cw-6,ch-6);ctx.save();ctx.globalAlpha=0.6+Math.sin(glowPhase)*0.4;ctx.fillStyle=GOLD;ctx.fillRect(lx,ly,lw,lh);ctx.restore();ctx.save();ctx.globalAlpha=0.75;ctx.fillStyle=GOLD;ctx.font=`bold ${Math.floor(W*0.065)}px Helvetica Neue`;ctx.textAlign='center';ctx.fillText('GNS',W/2,H*0.56);ctx.restore();ctx.save();ctx.globalAlpha=0.4;ctx.fillStyle='#888';ctx.font=`${Math.floor(W*0.045)}px Helvetica Neue`;ctx.textAlign='center';ctx.fillText(name.slice(0,12),W/2,H*0.65);ctx.restore(); }
+    // Load cover image if provided
+    let coverImg: HTMLImageElement | null = null;
+    let coverLoaded = false;
+    if (coverImage) {
+      coverImg = new Image();
+      coverImg.crossOrigin = 'anonymous';
+      coverImg.onload = () => { coverLoaded = true; };
+      coverImg.src = coverImage;
+    }
+
+    function drawUSB(){
+      if (coverLoaded && coverImg) {
+        // Draw cover image mapped onto USB body area
+        ctx.save();
+        ctx.drawImage(coverImg, bx, by, bw, bh);
+        // Overlay dark tint so USB details are visible
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.restore();
+        // Border
+        ctx.strokeStyle = LGRAY; ctx.lineWidth = 1; ctx.strokeRect(bx, by, bw, bh);
+      } else {
+        ctx.fillStyle=DGRAY; ctx.fillRect(bx,by,bw,bh);
+        ctx.strokeStyle=LGRAY; ctx.lineWidth=1; ctx.strokeRect(bx,by,bw,bh);
+      }
+      // Connector always drawn
+      ctx.fillStyle=LGRAY; ctx.fillRect(cx,cy,cw,ch);
+      ctx.strokeStyle='#3a3a3a'; ctx.strokeRect(cx,cy,cw,ch);
+      ctx.fillStyle='#444'; ctx.fillRect(cx+3,cy+3,cw-6,ch-6);
+      // LED glow
+      ctx.save(); ctx.globalAlpha=0.6+Math.sin(glowPhase)*0.4; ctx.fillStyle=GOLD; ctx.fillRect(lx,ly,lw,lh); ctx.restore();
+      // Text
+      ctx.save(); ctx.globalAlpha=0.85; ctx.fillStyle=GOLD; ctx.font=`bold ${Math.floor(W*0.065)}px Helvetica Neue`; ctx.textAlign='center'; ctx.fillText('GNS',W/2,H*0.56); ctx.restore();
+      ctx.save(); ctx.globalAlpha=0.5; ctx.fillStyle='#fff'; ctx.font=`${Math.floor(W*0.045)}px Helvetica Neue`; ctx.textAlign='center'; ctx.fillText(name.slice(0,12),W/2,H*0.65); ctx.restore();
+    }
     let rafId:number;
     function tick(){ ctx.clearRect(0,0,W,H);glowPhase+=0.06;frame++;
       if(state==='assembled'){drawUSB();}
@@ -151,7 +186,7 @@ function DigitalDisplay({ id, name, artist }: { id: string; name: string; artist
     parent.addEventListener('mouseenter',onEnter);parent.addEventListener('mouseleave',onLeave);parent.addEventListener('mousemove',onMove);parent.addEventListener('click',onClick);
     build(); rafId=requestAnimationFrame(tick);
     return ()=>{cancelAnimationFrame(rafId);parent.removeEventListener('mouseenter',onEnter);parent.removeEventListener('mouseleave',onLeave);parent.removeEventListener('mousemove',onMove);parent.removeEventListener('click',onClick);};
-  },[name]);
+  },[name, coverImage]);
 
   return <canvas ref={canvasRef} width={300} height={300} style={{width:'100%',height:'100%',display:'block'}} />;
 }
