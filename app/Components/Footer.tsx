@@ -55,7 +55,7 @@ const Footer = () => {
               New York City based independent music label representing up and coming Hip-Hop and R&B acts.
             </p>
             <a
-              href="https://discord.gg/tr6Gybnu"
+              href="https://discord.com/invite/tr6Gybnu"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm text-[#5865F2] hover:opacity-80 transition-opacity font-oswald tracking-widest mt-2 w-fit"
