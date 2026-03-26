@@ -1,45 +1,10 @@
-import React from 'react';
-import { PageWrapper } from '../Components/PageWrapper';
-import Header from '../Components/Header';
-import ComingSoonStore from '../Components/ComingSoonStore';
 import { getProducts } from '../../sanity/strapi-utils';
+import StoreClient from './StoreClient';
 
-const categories = [
-  { key: 'all', label: 'All' },
-  { key: 'digital', label: 'Digital Downloads' },
-  { key: 'vinyl', label: 'Vinyl' },
-  { key: 'tees', label: 'Tees' },
-  { key: 'hoodies', label: 'Hoodies' },
-  { key: 'accessories', label: 'Accessories' },
-];
+export const revalidate = 60;
 
 export default async function StorePage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const params = await searchParams;
-  const active = params?.category || 'all';
   const products = await getProducts();
-
-  return (
-    <PageWrapper>
-      <main className="min-h-screen">
-        <Header>
-          <h1 className="text-4xl font-bold font-oswald">Store</h1>
-        </Header>
-        <div className="border-b border-secondaryInteraction overflow-x-auto">
-          <div className="max-w-5xl mx-auto px-4 flex gap-0">
-            {categories.map((cat) => {
-              const isActive = active === cat.key;
-              const href = cat.key === 'all' ? '/store' : '/store?category=' + cat.key;
-              const cls = 'font-oswald text-sm tracking-widest px-5 py-4 border-b-2 whitespace-nowrap transition-colors ' + (isActive ? 'border-accent text-accent' : 'border-transparent text-gray-500 hover:text-white');
-              return (
-                <a key={cat.key} href={href} className={cls}>
-                  {cat.label.toUpperCase()}
-                </a>
-              );
-            })}
-          </div>
-        </div>
-        <ComingSoonStore activeCategory={active} strapiProducts={products} />
-      </main>
-    </PageWrapper>
-  );
+  return <StoreClient products={products} initialCategory={params?.category || 'all'} />;
 }
