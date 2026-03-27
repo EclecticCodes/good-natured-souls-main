@@ -9,7 +9,7 @@ const headers = [
   { key: "home", name: "Home", route: "/" },
   { key: "artists", name: "Artists", route: "/artists" },
   // { key: "shows", name: "Shows", route: "/shows" },
-  // { key: "store", name: "Store", route: "/store" },
+  { key: "store", name: "Store", route: "/store" },
   // { key: "articles", name: "Articles", route: "/articles" },
   // { key: "fanclub", name: "Fan Club", route: "/fanclub" },
   { key: "about", name: "About", route: "/about" },
@@ -169,7 +169,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
           </ul>
 
           <div className="flex items-center gap-3">
-{/* Cart hidden while store is in development */}
+{/* Cart */}
 
             <div className="hidden md:flex items-center gap-2">
               {session ? (
