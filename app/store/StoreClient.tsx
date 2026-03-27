@@ -61,7 +61,7 @@ function get3DType(category: string): string {
   return 'box';
 }
 
-export default function StoreClient({ products, initialCategory }: { products: Product[]; initialCategory: string }) {
+export default function StoreClient({ products, initialCategory, storeSettings }: { products: Product[]; initialCategory: string; storeSettings?: { heroImage?: string; heroCopy?: string; heroSubcopy?: string; categoryImages?: { categoryKey: string; image?: string }[] } }) {
   const { addItem } = useCart();
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
