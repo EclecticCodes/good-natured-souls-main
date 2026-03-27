@@ -1,28 +1,29 @@
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-import { getServerSession } from "next-auth";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { sql } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession();
     if (!session?.user?.email) return NextResponse.json({ orders: [] });
-    const customers = await stripe.customers.list({ email: session.user.email, limit: 1 });
-    if (customers.data.length === 0) return NextResponse.json({ orders: [] });
-    const customerId = customers.data[0].id;
-    const paymentIntents = await stripe.paymentIntents.list({
-      customer: customerId,
-      limit: 10,
-    });
-    const orders = paymentIntents.data.map(pi => ({
-      id: pi.id,
-      amount: pi.amount / 100,
-      status: pi.status,
-      date: new Date(pi.created * 1000).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-      items: pi.metadata?.items ? JSON.parse(pi.metadata.items) : [],
+
+    const orders = await sql`
+      SELECT * FROM orders
+      WHERE customer_email = ${session.user.email}
+      ORDER BY created_at DESC
+      LIMIT 20
+    `;
+
+    const formatted = orders.map(o => ({
+      id: o.id,
+      stripeId: o.stripe_payment_intent_id,
+      amount: o.amount_total / 100,
+      status: o.status,
+      date: new Date(o.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      items: Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]'),
     }));
-    return NextResponse.json({ orders });
+
+    return NextResponse.json({ orders: formatted });
   } catch (error: any) {
     return NextResponse.json({ orders: [] });
   }
