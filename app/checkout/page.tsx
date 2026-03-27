@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { useCart } from "../context/CartContext";
+import { useSession } from "next-auth/react";
 import { PageWrapper } from "../Components/PageWrapper";
 import Header from "../Components/Header";
 
@@ -89,10 +90,31 @@ const CheckoutForm = ({ customer }: { customer: CustomerInfo }) => {
 
 const CheckoutPage = () => {
   const { items, total } = useCart();
+  const { data: session } = useSession();
   const [clientSecret, setClientSecret] = useState("");
   const [step, setStep] = useState<"info" | "payment">("info");
   const [customer, setCustomer] = useState<CustomerInfo>({ name: "", email: "" });
   const [infoError, setInfoError] = useState("");
+
+  // If signed in, skip info step and go straight to payment
+  useEffect(() => {
+    if (session?.user?.email && step === "info" && items.length > 0) {
+      const name = session.user.name || session.user.email;
+      const email = session.user.email;
+      setCustomer({ name, email });
+      fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((i) => ({ price: i.price, quantity: i.quantity, name: i.name })),
+          customerName: name,
+          customerEmail: email,
+        }),
+      })
+        .then(res => res.json())
+        .then(data => { if (data.clientSecret) { setClientSecret(data.clientSecret); setStep("payment"); } });
+    }
+  }, [session, items]);
 
   const handleInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

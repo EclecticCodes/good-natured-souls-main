@@ -416,7 +416,17 @@ export default function AccountPage() {
                     </div>
                     <div>
                       <label className={labelClass}>Birthday</label>
-                      <input type="date" value={settingsForm.birthday} onChange={e => setSettingsForm(f => ({ ...f, birthday: e.target.value }))} className={inputClass} />
+                      {settingsForm.birthday ? (
+                        <div className="flex items-center justify-between border border-secondaryInteraction px-4 py-3">
+                          <span className="text-white text-sm">
+                            {new Date(settingsForm.birthday + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                          </span>
+                          <button type="button" onClick={() => setSettingsForm(f => ({ ...f, birthday: '' }))}
+                            className="font-oswald text-xs text-gray-600 tracking-widest hover:text-accent transition-colors">CHANGE</button>
+                        </div>
+                      ) : (
+                        <input type="date" value={settingsForm.birthday} onChange={e => setSettingsForm(f => ({ ...f, birthday: e.target.value }))} className={inputClass} />
+                      )}
                     </div>
                   </div>
                 </div>

@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
+    "@node-rs/argon2": "^2.0.2",
     "@portabletext/react": "^3.2.1",
     "@sanity/client": "^6.28.4",
     "@sanity/structure": "^2.36.2",
