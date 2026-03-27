@@ -1,40 +1,15 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { PageWrapper } from "../../Components/PageWrapper";
 
-const DEFAULT_EMAIL = "goodnaturedsouls@gmail.com";
-const MAX_CHANGES = 3;
-const TIMER_SECONDS = 30;
-
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState(DEFAULT_EMAIL);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [changesLeft, setChangesLeft] = useState(MAX_CHANGES);
-  const [countdown, setCountdown] = useState(0);
-  const [showWarning, setShowWarning] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("gns-credential-changes");
-    if (saved) setChangesLeft(Math.max(0, MAX_CHANGES - parseInt(saved)));
-  }, []);
-
-  useEffect(() => {
-    if (countdown > 0) {
-      timerRef.current = setTimeout(() => setCountdown(prev => prev - 1), 1000);
-    } else if (countdown === 0 && isEditing) {
-      setEmail(DEFAULT_EMAIL);
-      setIsEditing(false);
-      setShowWarning(false);
-    }
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [countdown, isEditing]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,27 +17,24 @@ export default function LoginPage() {
     const res = await signIn("credentials", { email, password, redirect: false });
     setLoading(false);
     if (res?.error) { setError("Invalid email or password."); }
-    else { router.push("/auth/welcome"); }
+    else { router.push("/account"); }
   };
 
-  const handleGoogle = () => signIn("google", { callbackUrl: "/auth/welcome" });
+  const handleGoogle = () => signIn("google", { callbackUrl: "/account" });
 
   return (
     <PageWrapper>
       <main className="min-h-screen flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
 
-          {/* Header */}
           <div className="text-center mb-10">
             <a href="/" className="font-erica text-5xl text-white">GNS</a>
             <div className="w-8 h-0.5 bg-accent mx-auto my-3" />
             <p className="font-oswald text-xs tracking-[5px] text-gray-600 uppercase">Good Natured Souls</p>
           </div>
 
-          {/* Card */}
           <div className="border border-secondaryInteraction border-t-2 border-t-accent">
 
-            {/* Tabs */}
             <div className="flex border-b border-secondaryInteraction">
               <div className="flex-1 py-3.5 text-center font-oswald text-xs tracking-widest text-accent font-bold border-b-2 border-accent -mb-px cursor-default">
                 SIGN IN
@@ -74,7 +46,6 @@ export default function LoginPage() {
 
             <div className="p-7">
 
-              {/* Google */}
               <button
                 onClick={handleGoogle}
                 className="w-full flex items-center justify-center gap-3 border border-secondaryInteraction py-3 font-oswald text-xs tracking-widest hover:border-white transition-colors mb-5"
@@ -88,29 +59,23 @@ export default function LoginPage() {
                 CONTINUE WITH GOOGLE
               </button>
 
-              {/* Divider */}
               <div className="flex items-center gap-3 mb-5">
                 <div className="flex-1 border-t border-secondaryInteraction" />
                 <span className="font-oswald text-xs tracking-widest text-gray-700">OR</span>
                 <div className="flex-1 border-t border-secondaryInteraction" />
               </div>
 
-              {/* Form */}
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-5">
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase">Email</label>
-                    {isEditing && countdown > 0 && (
-                      <span className="font-oswald text-xs text-accent">{countdown}s</span>
-                    )}
-                  </div>
+                  <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-2">Email</label>
                   <input
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    readOnly={!isEditing}
                     placeholder="your@email.com"
-                    className={"w-full bg-primary border text-white px-4 py-3 text-sm focus:outline-none transition-colors placeholder-gray-600 " + (isEditing ? "border-accent" : "border-secondaryInteraction")}
+                    autoComplete="email"
+                    required
+                    className="w-full bg-primary border border-secondaryInteraction text-white px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors placeholder-gray-600"
                   />
                 </div>
                 <div>
@@ -123,6 +88,8 @@ export default function LoginPage() {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
+                    autoComplete="current-password"
+                    required
                     className="w-full bg-primary border border-secondaryInteraction text-white px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors placeholder-gray-600"
                   />
                 </div>
@@ -139,39 +106,6 @@ export default function LoginPage() {
                   {loading ? "SIGNING IN..." : "SIGN IN"}
                 </button>
               </form>
-
-              {/* Warning for credential changes */}
-              {showWarning && (
-                <div className="border border-accent p-4 mb-4">
-                  <p className="font-oswald text-xs font-bold mb-1 text-accent">USE A CREDENTIAL CHANGE?</p>
-                  <p className="text-gray-400 text-xs mb-3 leading-relaxed">
-                    You have <span className="text-accent font-bold">{changesLeft} of {MAX_CHANGES}</span> changes remaining.
-                    You will have <span className="text-accent font-bold">{TIMER_SECONDS} seconds</span> to enter new credentials.
-                  </p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => {
-                        const used = parseInt(localStorage.getItem("gns-credential-changes") || "0") + 1;
-                        localStorage.setItem("gns-credential-changes", String(used));
-                        setChangesLeft(prev => prev - 1);
-                        setIsEditing(true);
-                        setEmail("");
-                        setCountdown(TIMER_SECONDS);
-                        setShowWarning(false);
-                      }}
-                      className="flex-1 bg-accent text-primary font-oswald text-xs font-bold py-2 tracking-widest"
-                    >
-                      CONFIRM
-                    </button>
-                    <button
-                      onClick={() => setShowWarning(false)}
-                      className="flex-1 border border-secondaryInteraction text-gray-500 font-oswald text-xs py-2 tracking-widest hover:border-white transition-colors"
-                    >
-                      CANCEL
-                    </button>
-                  </div>
-                </div>
-              )}
 
               <p className="text-center text-xs text-gray-600">
                 New to GNS?{" "}
