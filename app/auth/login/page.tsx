@@ -28,9 +28,12 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
 
           <div className="text-center mb-10">
-            <a href="/" className="font-erica text-5xl text-white">GNS</a>
+            <a href="/" className="font-erica text-5xl text-white hover:text-accent transition-colors">GNS</a>
             <div className="w-8 h-0.5 bg-accent mx-auto my-3" />
-            <p className="font-oswald text-xs tracking-[5px] text-gray-600 uppercase">Good Natured Souls</p>
+            <p className="font-oswald text-xs tracking-[5px] text-gray-500 uppercase mb-3">Good Natured Souls</p>
+            <p className="font-cormorant text-gray-700 text-sm italic leading-relaxed max-w-xs mx-auto">
+              Your gateway to exclusive music, merch, and the GNS community.
+            </p>
           </div>
 
           <div className="border border-secondaryInteraction border-t-2 border-t-accent">
@@ -115,7 +118,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="text-center font-oswald text-xs tracking-[5px] text-gray-800 mt-6">EXIST ALTRUISTIC</p>
+          <p className="text-center font-oswald text-xs tracking-[5px] text-gray-600 mt-6 hover:text-accent transition-colors cursor-default">EXIST ALTRUISTIC</p>
 
         </div>
       </main>
