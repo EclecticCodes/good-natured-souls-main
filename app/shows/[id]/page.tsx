@@ -177,6 +177,31 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
     if (resolvedId) fetchShow();
   }, [resolvedId]);
 
+  useEffect(() => {
+    if (!resolvedId || !session?.user?.email) return;
+    fetch(`/api/show-rsvp?show_id=${resolvedId}`)
+      .then(r => r.json())
+      .then(d => setRsvpTypes((d.rsvps || []).map((r: any) => r.type)));
+  }, [resolvedId, session]);
+
+  const handleRsvp = async (type: string) => {
+    if (!session) { window.location.href = '/auth/login'; return; }
+    setRsvpLoading(true);
+    await fetch('/api/show-rsvp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ show_id: resolvedId, show_title: show?.title, type }),
+    });
+    setRsvpTypes(prev => [...prev, type]);
+    setRsvpToast(
+      type === 'presale' ? "Added to presale list!" :
+      type === 'rsvp' ? "RSVP confirmed!" :
+      "You'll be notified when tickets drop!"
+    );
+    setTimeout(() => setRsvpToast(''), 3000);
+    setRsvpLoading(false);
+  };
+
   const handleBuyTicket = () => {
     if (!show || show.soldOut) return;
     if (show.ticketPlatform !== 'stripe' && show.ticketUrl) {
