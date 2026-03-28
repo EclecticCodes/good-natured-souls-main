@@ -109,11 +109,41 @@ const ArtistPage = async ({ params }: Props) => {
             </div>
           )}
 
-          {/* Spotify embed */}
-          {artist.spotifyEmbedUrl && (
+          {/* Streaming — Spotify → SoundCloud → Bandcamp → Apple Music fallback */}
+          {(artist.spotifyEmbedUrl || artist.soundcloudUrl || artist.bandcampUrl || artist.appleMusicUrl) && (
             <div className="mb-12 md:mb-16">
               <p className="font-oswald text-xs tracking-[6px] text-accent uppercase mb-6">Streaming</p>
-              <TopTracks spotifyEmbedUrl={artist.spotifyEmbedUrl} />
+              {artist.spotifyEmbedUrl ? (
+                <TopTracks spotifyEmbedUrl={artist.spotifyEmbedUrl} />
+              ) : artist.soundcloudUrl ? (
+                <iframe
+                  width="100%"
+                  height="166"
+                  allow="autoplay"
+                  src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(artist.soundcloudUrl)}&color=%23F0B51E&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false`}
+                  style={{ border: 'none', maxWidth: 700 }}
+                />
+              ) : artist.bandcampUrl ? (
+                <a href={artist.bandcampUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 border border-secondaryInteraction hover:border-accent px-6 py-4 transition-colors group">
+                  <span className="text-2xl">🎸</span>
+                  <div>
+                    <p className="font-oswald text-sm font-bold group-hover:text-accent transition-colors">Listen on Bandcamp</p>
+                    <p className="text-gray-600 text-xs">{artist.bandcampUrl}</p>
+                  </div>
+                  <span className="ml-auto font-oswald text-xs text-accent tracking-widest">LISTEN ↗</span>
+                </a>
+              ) : artist.appleMusicUrl ? (
+                <a href={artist.appleMusicUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 border border-secondaryInteraction hover:border-accent px-6 py-4 transition-colors group">
+                  <span className="text-2xl">🍎</span>
+                  <div>
+                    <p className="font-oswald text-sm font-bold group-hover:text-accent transition-colors">Listen on Apple Music</p>
+                    <p className="text-gray-600 text-xs">{artist.appleMusicUrl}</p>
+                  </div>
+                  <span className="ml-auto font-oswald text-xs text-accent tracking-widest">LISTEN ↗</span>
+                </a>
+              ) : null}
             </div>
           )}
 
