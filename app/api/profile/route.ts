@@ -38,60 +38,58 @@ export async function PUT(req: NextRequest) {
     const existing = await sql`SELECT * FROM customers WHERE email = ${session.user.email}`;
     const current = existing[0];
 
-    // Name change enforcement
-    const nameChanges = current?.name_changes || 0;
-    const nameChanged = (first_name && first_name !== current?.first_name) || (last_name && last_name !== current?.last_name);
+    const nameChanges: number = current?.name_changes || 0;
+    const nameChanged: boolean = !!(
+      (first_name && first_name !== current?.first_name) ||
+      (last_name && last_name !== current?.last_name)
+    );
+
     if (nameChanged && nameChanges >= MAX_NAME_CHANGES) {
       return NextResponse.json({ error: `Name can only be changed ${MAX_NAME_CHANGES} times.` }, { status: 403 });
     }
 
-    // Birthday enforcement — once set cannot change
-    const birthdaySet = current?.birthday_set || false;
-    const encryptedPhone = phone ? encrypt(phone) : null;
-    const encryptedBirthday = birthday && !birthdaySet ? encrypt(birthday) : null;
+    const birthdaySet: boolean = current?.birthday_set || false;
+    const encryptedPhone: string | null = phone ? encrypt(phone) : null;
+    const encryptedBirthday: string | null = birthday && !birthdaySet ? encrypt(birthday) : null;
+    const newBirthdaySet: boolean = birthdaySet || !!encryptedBirthday;
+    const newNameChanges: number = nameChanged ? nameChanges + 1 : nameChanges;
 
-    const full_name = [first_name || current?.first_name, middle_name !== undefined ? middle_name : current?.middle_name, last_name || current?.last_name].filter(Boolean).join(' ');
+    const fn: string | null = nameChanged ? (first_name || current?.first_name || null) : (current?.first_name || null);
+    const mn: string | null = middle_name !== undefined ? (middle_name || null) : (current?.middle_name || null);
+    const ln: string | null = nameChanged ? (last_name || current?.last_name || null) : (current?.last_name || null);
+    const full_name: string = [fn, mn, ln].filter(Boolean).join(' ');
 
-    await sql`
-      INSERT INTO customers (email, first_name, middle_name, last_name, name, phone, birthday, birthday_set, genres, favorite_artists, name_changes)
-      VALUES (
-        ${session.user.email},
-        ${first_name || null},
-        ${middle_name || null},
-        ${last_name || null},
-        ${full_name},
-        ${encryptedPhone},
-        ${encryptedBirthday},
-        ${!!encryptedBirthday},
-        ${genres || []},
-        ${favorite_artists || []},
-        0
-      )
-      ON CONFLICT (email) DO UPDATE SET
-        first_name = CASE WHEN ${nameChanged} AND customers.name_changes < ${MAX_NAME_CHANGES}
-                         THEN COALESCE(${first_name || null}, customers.first_name)
-                         ELSE customers.first_name END,
-        middle_name = COALESCE(${middle_name !== undefined ? middle_name || null : null}, customers.middle_name),
-        last_name = CASE WHEN ${nameChanged} AND customers.name_changes < ${MAX_NAME_CHANGES}
-                        THEN COALESCE(${last_name || null}, customers.last_name)
-                        ELSE customers.last_name END,
-        name = CASE WHEN ${nameChanged} AND customers.name_changes < ${MAX_NAME_CHANGES}
-                    THEN ${full_name} ELSE customers.name END,
-        name_changes = CASE WHEN ${nameChanged} AND customers.name_changes < ${MAX_NAME_CHANGES}
-                            THEN customers.name_changes + 1 ELSE customers.name_changes END,
-        phone = COALESCE(${encryptedPhone}, customers.phone),
-        birthday = CASE WHEN customers.birthday_set = false AND ${encryptedBirthday} IS NOT NULL
-                        THEN ${encryptedBirthday} ELSE customers.birthday END,
-        birthday_set = CASE WHEN customers.birthday_set = false AND ${encryptedBirthday} IS NOT NULL
-                            THEN true ELSE customers.birthday_set END,
-        genres = COALESCE(${genres || null}, customers.genres),
-        favorite_artists = COALESCE(${favorite_artists || null}, customers.favorite_artists),
-        updated_at = NOW()
-    `;
+    const g: string[] = genres || current?.genres || [];
+    const fa: string[] = favorite_artists || current?.favorite_artists || [];
+
+    if (!current) {
+      // New customer insert
+      await sql`
+        INSERT INTO customers (email, first_name, middle_name, last_name, name, phone, birthday, birthday_set, genres, favorite_artists, name_changes)
+        VALUES (${session.user.email}, ${fn}, ${mn}, ${ln}, ${full_name}, ${encryptedPhone}, ${encryptedBirthday}, ${newBirthdaySet}, ${g}, ${fa}, ${newNameChanges})
+      `;
+    } else {
+      // Update existing
+      await sql`
+        UPDATE customers SET
+          first_name = ${fn},
+          middle_name = ${mn},
+          last_name = ${ln},
+          name = ${full_name},
+          name_changes = ${newNameChanges},
+          phone = COALESCE(${encryptedPhone}, phone),
+          birthday = CASE WHEN birthday_set = false AND ${encryptedBirthday} IS NOT NULL THEN ${encryptedBirthday} ELSE birthday END,
+          birthday_set = ${newBirthdaySet},
+          genres = ${g},
+          favorite_artists = ${fa},
+          updated_at = NOW()
+        WHERE email = ${session.user.email}
+      `;
+    }
 
     return NextResponse.json({
       success: true,
-      name_changes_remaining: MAX_NAME_CHANGES - (nameChanged ? nameChanges + 1 : nameChanges),
+      name_changes_remaining: MAX_NAME_CHANGES - newNameChanges,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
