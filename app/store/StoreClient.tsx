@@ -122,16 +122,11 @@ export default function StoreClient({ products, initialCategory, storeSettings }
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '56px 24px 40px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <p style={{ fontSize: 9, letterSpacing: 4, color: '#F0B51E', textTransform: 'uppercase', margin: 0 }}>Good Natured Souls</p>
           <h1 style={{ fontSize: 'clamp(40px, 7vw, 72px)', fontWeight: 900, margin: 0, letterSpacing: '-3px', lineHeight: 0.95 }}>
-            {storeSettings?.heroCopy || 'The Store'}
+            The Store
           </h1>
-          {storeSettings?.heroSubcopy && (
-            <p style={{ fontSize: 13, color: '#444', margin: 0, maxWidth: 480, lineHeight: 1.6 }}>{storeSettings.heroSubcopy}</p>
-          )}
-          {!storeSettings?.heroSubcopy && (
-            <p style={{ fontSize: 13, color: '#444', margin: 0, maxWidth: 480, lineHeight: 1.6 }}>
-              Music, merch, and more — straight from The Bronx. Every purchase supports independent artists.
-            </p>
-          )}
+          <p style={{ fontSize: 13, color: '#444', margin: 0, maxWidth: 480, lineHeight: 1.6 }}>
+            Music, merch, and more — straight from The Bronx. Every purchase supports independent artists.
+          </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 4 }}>
             <div style={{ width: 32, height: 1, background: '#F0B51E' }} />
             <span style={{ fontSize: 9, letterSpacing: 4, color: '#333', textTransform: 'uppercase' }}>Exist Altruistic</span>

@@ -125,8 +125,24 @@ const ShowsComponent = () => {
       </h2>
 
       {loading ? (
-        <div className='text-center py-16'>
-          <p className='font-oswald text-gray-500 tracking-widest animate-pulse'>LOADING SHOWS...</p>
+        <div className='flex flex-col gap-4 mb-12'>
+          {[1,2,3].map(i => (
+            <div key={i} className='border border-secondaryInteraction flex flex-col sm:flex-row animate-pulse'>
+              <div className='bg-secondaryInteraction flex flex-col items-center justify-center px-6 py-4 min-w-[80px] gap-2'>
+                <div className='w-8 h-3 bg-primary rounded' />
+                <div className='w-10 h-8 bg-primary rounded' />
+                <div className='w-8 h-3 bg-primary rounded' />
+              </div>
+              <div className='flex flex-1 flex-col sm:flex-row items-start sm:items-center justify-between p-4 gap-4'>
+                <div className='flex flex-col gap-2'>
+                  <div className='w-24 h-3 bg-secondaryInteraction rounded' />
+                  <div className='w-48 h-5 bg-secondaryInteraction rounded' />
+                  <div className='w-36 h-3 bg-secondaryInteraction rounded' />
+                </div>
+                <div className='w-24 h-8 bg-secondaryInteraction rounded' />
+              </div>
+            </div>
+          ))}
         </div>
       ) : shows.length === 0 ? (
         <div className='border border-secondaryInteraction p-12 text-center mb-12'>
