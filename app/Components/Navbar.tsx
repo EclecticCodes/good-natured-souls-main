@@ -66,7 +66,8 @@ const Navbar = () => {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [artistIndex, setArtistIndex] = useState(0);
   const [latestProject, setLatestProject] = useState<Project | null>(null);
-  const { count } = useCart();
+  const { count, items, removeItem, total } = useCart();
+  const [cartOpen, setCartOpen] = useState(false);
   const { data: session } = useSession();
   const isAdminPath = pathname.startsWith("/admin");
   const isHome = pathname === "/";
@@ -184,7 +185,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
             <div className="hidden md:flex items-center gap-2">
               {session ? (
                 <>
-                  <a href="/profile" className="font-oswald text-xs text-gray-400 hover:text-accent transition-colors truncate max-w-[100px]">{session.user?.name || session.user?.email}</a>
+                  <a href="/account" className="font-oswald text-xs text-gray-400 hover:text-accent transition-colors truncate max-w-[100px]">{session.user?.name || session.user?.email}</a>
                   <button onClick={() => signOut()} className="font-oswald text-xs tracking-widest text-gray-500 hover:text-accent transition-colors">SIGN OUT</button>
                 </>
               ) : (
@@ -280,7 +281,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
 
                 {session ? (
                   <div className="flex items-center justify-between">
-                    <a href="/profile" onClick={() => setMenuOpen(false)} className="font-oswald text-xs text-gray-400">{session.user?.name || session.user?.email}</a>
+                    <a href="/account" onClick={() => setMenuOpen(false)} className="font-oswald text-xs text-gray-400">{session.user?.name || session.user?.email}</a>
                     <button onClick={() => { signOut(); setMenuOpen(false); }} className="font-oswald text-xs tracking-widest text-gray-500 hover:text-accent">SIGN OUT</button>
                   </div>
                 ) : (
@@ -359,6 +360,84 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
               <p className="absolute top-4 right-4 font-oswald text-xs text-white/30 tracking-widest z-30">TAP TO CLOSE</p>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Cart Drawer */}
+      <AnimatePresence>
+        {cartOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setCartOpen(false)}
+              className="fixed inset-0 bg-black/60 z-50"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="fixed top-0 right-0 h-full w-full max-w-sm bg-background border-l border-secondaryInteraction z-50 flex flex-col"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-secondaryInteraction">
+                <span className="font-oswald text-sm font-bold tracking-widest uppercase">Cart ({count})</span>
+                <button onClick={() => setCartOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+
+              {/* Items */}
+              <div className="flex-1 overflow-y-auto px-6 py-4">
+                {items.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full gap-3">
+                    <p className="font-oswald text-gray-600 tracking-widest text-sm">YOUR CART IS EMPTY</p>
+                    <a href="/store" onClick={() => setCartOpen(false)} className="font-oswald text-xs text-accent tracking-widest hover:underline">BROWSE STORE →</a>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {items.map(item => (
+                      <div key={item.id} className="flex items-center gap-3 border border-secondaryInteraction p-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-oswald text-sm font-bold truncate">{item.name}</p>
+                          <p className="text-gray-500 text-xs uppercase tracking-widest">{item.type}</p>
+                          <p className="text-accent text-sm font-oswald font-bold mt-1">${(item.price * item.quantity).toFixed(2)}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            className="text-gray-600 hover:text-red-500 transition-colors"
+                            title="Remove item"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                          </button>
+                          <span className="font-oswald text-xs text-gray-500">x{item.quantity}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              {items.length > 0 && (
+                <div className="px-6 py-4 border-t border-secondaryInteraction">
+                  <div className="flex justify-between font-oswald font-bold text-base mb-4">
+                    <span>Total</span>
+                    <span className="text-accent">${total.toFixed(2)}</span>
+                  </div>
+                  <a
+                    href="/checkout"
+                    onClick={() => setCartOpen(false)}
+                    className="block w-full bg-accent text-primary font-oswald font-bold text-sm py-4 tracking-widest hover:bg-accentInteraction transition-colors text-center"
+                  >
+                    CHECKOUT
+                  </a>
+                </div>
+              )}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
