@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { resolveUrl } from '@/lib/resolveUrl';
 
 type Show = {
   id: string;
@@ -15,6 +16,7 @@ type Show = {
   source: 'strapi';
   soldOut?: boolean;
   flyer?: string;
+  venueAddress?: string;
 };
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -50,13 +52,6 @@ const ShowsComponent = () => {
       try {
         const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
-// Handles both local Strapi URLs and absolute Cloudinary URLs
-const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${strapiUrl}${url}`;
-};
-
         const res = await fetch(`${strapiUrl}/api/shows?sort=date:asc&populate=flyer&publicationState=live`);
         if (res.ok) {
           const json = await res.json();
@@ -71,6 +66,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
             ticketUrl: item.attributes.ticketUrl || null,
             ticketPlatform: item.attributes.ticketPlatform || 'stripe',
             soldOut: item.attributes.soldOut || false,
+            venueAddress: item.attributes.venueAddress || null,
             flyer: item.attributes.flyer?.data?.attributes?.url
               ? resolveUrl(item.attributes.flyer.data.attributes.url, strapiUrl)
               : null,
@@ -163,7 +159,15 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
                         {show.title}
                       </a>
                     </h3>
-                    <p className='text-gray-500 text-sm'>{show.venue} · {show.city}</p>
+                    {show.venueAddress ? (
+                      <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(show.venueAddress)}`}
+                        target='_blank' rel='noopener noreferrer'
+                        className='text-gray-500 text-sm hover:text-accent transition-colors'>
+                        {show.venue} · {show.city} ↗
+                      </a>
+                    ) : (
+                      <p className='text-gray-500 text-sm'>{show.venue} · {show.city}</p>
+                    )}
                     <p className='text-gray-600 text-xs mt-1'>{d.time}</p>
                   </div>
 

@@ -6,7 +6,6 @@ type Props = {
 };
 
 const Polaroid = ({ profileImage, signature }: Props) => {
-  console.log("Polaroid rendered");
 
   return (
     <div>

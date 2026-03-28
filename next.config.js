@@ -10,8 +10,6 @@ const nextConfig = {
     return [
       { source: '/fanclub', destination: '/', permanent: false },
       { source: '/fanclub/:path*', destination: '/', permanent: false },
-      { source: '/articles', destination: '/', permanent: false },
-      { source: '/articles/:path*', destination: '/', permanent: false },
     ];
   },
 };

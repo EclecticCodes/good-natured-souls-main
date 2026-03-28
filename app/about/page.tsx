@@ -2,6 +2,7 @@
 import { PageWrapper } from "../Components/PageWrapper";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { resolveUrl } from '@/lib/resolveUrl';
 
 const MARQUEE_TEXT = [
   "EXIST ALTRUISTIC", "GOOD NATURED SOULS", "EXIST ALTRUISTIC",
@@ -46,13 +47,6 @@ export default function AboutPage() {
 
   useEffect(() => {
     const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-
-// Handles both local Strapi URLs and absolute Cloudinary URLs
-const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${strapiUrl}${url}`;
-};
 
     fetch(`${strapiUrl}/api/artists?populate=profileImage&sort=orderRank:asc`)
       .then((r) => r.json())

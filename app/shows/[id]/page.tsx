@@ -5,6 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { PageWrapper } from '../../Components/PageWrapper';
 import Header from '../../Components/Header';
 import Icon from '../../Components/Icon';
+import { resolveUrl } from '@/lib/resolveUrl';
 
 type Show = {
   id: string;
@@ -19,6 +20,7 @@ type Show = {
   soldOut: boolean;
   description?: string;
   flyer?: string;
+  venueAddress?: string;
 };
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -144,13 +146,6 @@ export default function ShowPage({ params: paramsRaw }: any) {
       try {
         const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
-// Handles both local Strapi URLs and absolute Cloudinary URLs
-const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${strapiUrl}${url}`;
-};
-
         const res = await fetch(`${strapiUrl}/api/shows/${resolvedId}?populate=flyer`);
         if (!res.ok) { setNotFound(true); setLoading(false); return; }
         const json = await res.json();
@@ -167,6 +162,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
           ticketPlatform: item.attributes.ticketPlatform || 'stripe',
           soldOut: item.attributes.soldOut || false,
           description: item.attributes.description || null,
+          venueAddress: item.attributes.venueAddress || null,
           flyer: item.attributes.flyer?.data?.attributes?.url
             ? resolveUrl(item.attributes.flyer.data.attributes.url, strapiUrl)
             : null,
@@ -276,11 +272,27 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
               <div className='border border-secondaryInteraction p-4 flex flex-col gap-2'>
                 <div className='flex justify-between text-sm'>
                   <span className='text-gray-500'>Venue</span>
-                  <span>{show.venue}</span>
+                  {show.venueAddress ? (
+                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(show.venueAddress)}`}
+                      target='_blank' rel='noopener noreferrer'
+                      className='text-accent hover:underline flex items-center gap-1'>
+                      {show.venue} <span style={{fontSize:10}}>↗</span>
+                    </a>
+                  ) : (
+                    <span>{show.venue}</span>
+                  )}
                 </div>
                 <div className='flex justify-between text-sm'>
                   <span className='text-gray-500'>Location</span>
-                  <span>{show.city}</span>
+                  {show.venueAddress ? (
+                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(show.venueAddress)}`}
+                      target='_blank' rel='noopener noreferrer'
+                      className='text-gray-400 hover:text-accent hover:underline text-xs'>
+                      {show.city} · Get Directions ↗
+                    </a>
+                  ) : (
+                    <span>{show.city}</span>
+                  )}
                 </div>
                 <div className='flex justify-between text-sm'>
                   <span className='text-gray-500'>Platform</span>

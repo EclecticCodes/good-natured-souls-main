@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { PageWrapper } from "../Components/PageWrapper";
 import Header from "../Components/Header";
+import { resolveUrl } from '@/lib/resolveUrl';
 
 type Article = {
   id: string;
@@ -28,13 +29,6 @@ export default function ArticlesPage() {
     const fetchArticles = async () => {
       try {
         const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-
-// Handles both local Strapi URLs and absolute Cloudinary URLs
-const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${strapiUrl}${url}`;
-};
 
         const res = await fetch(`${strapiUrl}/api/articles?sort=isFeatured:desc,publishedAt:desc&populate=coverImage,relatedArtist`);
         if (!res.ok) { setLoading(false); return; }

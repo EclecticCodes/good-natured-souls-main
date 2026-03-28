@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { resolveUrl } from '@/lib/resolveUrl';
 
 type SpotlightArtist = {
   id: string;
@@ -17,13 +18,6 @@ const ArtistSpotlight = () => {
 
   useEffect(() => {
     const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-
-// Handles both local Strapi URLs and absolute Cloudinary URLs
-const resolveUrl = (url: string | undefined | null, strapiUrl: string): string => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${strapiUrl}${url}`;
-};
 
     fetch(`${strapiUrl}/api/artists?populate=profileImage,backgroundImage&filters[artistType][$eq]=spotlight&sort=orderRank:asc`)
       .then((r) => r.json())
