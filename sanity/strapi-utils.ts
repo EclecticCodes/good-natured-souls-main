@@ -203,7 +203,9 @@ export async function getHomePageData() {
     }));
     const artistCount: Record<string, number> = {};
     const featuredProjects = allProjects.filter((p: any) => {
-      const key = p.artist || 'unknown';
+      // If no artist relation, always include (don't group under 'unknown')
+      if (!p.artist) return true;
+      const key = p.artist;
       artistCount[key] = (artistCount[key] || 0) + 1;
       return artistCount[key] <= 2;
     });

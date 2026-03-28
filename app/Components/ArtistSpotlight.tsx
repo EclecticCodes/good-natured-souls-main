@@ -19,7 +19,7 @@ const ArtistSpotlight = () => {
   useEffect(() => {
     const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
-    fetch(`${strapiUrl}/api/artists?populate=profileImage,backgroundImage&filters[artistType][$eq]=spotlight&sort=orderRank:asc`)
+    fetch(`${strapiUrl}/api/artists?populate=profileImage,backgroundImage&filters[isSpotlight][$eq]=true&sort=orderRank:asc`)
       .then((r) => r.json())
       .then((json) => {
         setArtists((json.data || []).map((item: any) => ({
