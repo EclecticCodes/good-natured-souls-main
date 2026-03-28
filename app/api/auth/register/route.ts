@@ -19,23 +19,21 @@ export async function POST(req: NextRequest) {
 
     const password_hash = await bcrypt.hash(password, 12);
     const full_name = [first_name, middle_name, last_name].filter(Boolean).join(' ');
-    const encryptedBirthday = birthday ? encrypt(birthday) : null;
-    const birthdaySet = birthday ? true : false;
+    const encryptedBirthday: string | null = birthday ? encrypt(birthday) : null;
+    const themeArtist: string | null = theme_artist || null;
+    const middleName: string | null = middle_name?.trim() || null;
 
-    await sql`
-      INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, birthday, birthday_set, theme_artist)
-      VALUES (
-        ${email},
-        ${first_name.trim()},
-        ${middle_name?.trim() || null},
-        ${last_name.trim()},
-        ${full_name},
-        ${password_hash},
-        ${encryptedBirthday},
-        ${birthdaySet},
-        ${theme_artist || null}
-      )
-    `;
+    if (encryptedBirthday) {
+      await sql`
+        INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, birthday, birthday_set, theme_artist)
+        VALUES (${email}, ${first_name.trim()}, ${middleName}, ${last_name.trim()}, ${full_name}, ${password_hash}, ${encryptedBirthday}, true, ${themeArtist})
+      `;
+    } else {
+      await sql`
+        INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, theme_artist)
+        VALUES (${email}, ${first_name.trim()}, ${middleName}, ${last_name.trim()}, ${full_name}, ${password_hash}, ${themeArtist})
+      `;
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
