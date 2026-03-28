@@ -24,21 +24,11 @@ export async function POST(req: NextRequest) {
     const full_name = [fn, mn, ln].filter(Boolean).join(' ');
     const encryptedBirthday = birthday ? encrypt(birthday) : '';
     const ta = theme_artist || '';
+    const birthdaySet = encryptedBirthday !== '';
 
-    // Use empty string instead of null — convert on read
     await sql`
       INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, birthday, birthday_set, theme_artist)
-      VALUES (
-        ${email},
-        ${fn},
-        ${mn},
-        ${ln},
-        ${full_name},
-        ${password_hash},
-        ${encryptedBirthday},
-        ${encryptedBirthday !== ''},
-        ${ta}
-      )
+      VALUES (${email}, ${fn}, ${mn}, ${ln}, ${full_name}, ${password_hash}, ${encryptedBirthday}, ${birthdaySet}, ${ta})
     `;
 
     return NextResponse.json({ success: true });
