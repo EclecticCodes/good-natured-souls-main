@@ -15,7 +15,7 @@ export default function SignupPage() {
   const [form, setForm] = useState({
     first_name: "", middle_name: "", last_name: "",
     email: "", password: "", confirm: "",
-    birthday: "", phone: "",
+    birthday: "", phone: "", theme_artist: "",
     genres: [] as string[],
     favoriteArtists: [] as string[],
   });
