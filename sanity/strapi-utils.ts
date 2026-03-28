@@ -26,8 +26,18 @@ export async function getArtists() {
 }
 
 export async function getArtistWithProjects(slug: string) {
+  const populate = [
+    'profileImage',
+    'backgroundImage',
+    'socialMediaLinks',
+    'projects.cover',
+    'musicVideos.thumbnail',
+    'epk.pressPhotos',
+    'HighlightArticles.coverImage',
+  ].join(',');
+
   const res = await fetch(
-    `${STRAPI_URL}/api/artists?filters[slug][$eq]=${slug}&populate=profileImage,backgroundImage,socialMediaLinks,projects.cover`,
+    `${STRAPI_URL}/api/artists?filters[slug][$eq]=${slug}&populate=${populate}`,
     { cache: 'no-store' }
   );
   if (!res.ok) throw new Error('Failed to fetch artist');
@@ -73,6 +83,36 @@ export async function getArtistWithProjects(slug: string) {
     return undefined;
   })();
 
+  // Music videos
+  const musicVideos = (attrs.musicVideos || []).map((v: any) => ({
+    title: v.title || '',
+    videoUrl: v.videoUrl || '',
+    platform: v.platform || 'youtube',
+    description: v.Description || '',
+    thumbnailUrl: resolveUrl(v.thumbnail?.data?.attributes?.url),
+  }));
+
+  // EPK
+  const epk = attrs.epk ? {
+    bio: attrs.epk.bio || '',
+    pressQuote: attrs.epk.pressQuote || '',
+    pressQuoteSource: attrs.epk.pressQuoteSource || '',
+    genre: attrs.epk.genre || '',
+    location: attrs.epk.location || '',
+    bookingEmail: attrs.epk.bookingEmail || '',
+    pressEmail: attrs.epk.pressEmail || '',
+    website: attrs.epk.website || '',
+    pressPhotos: (attrs.epk.pressPhotos?.data || []).map((p: any) => resolveUrl(p.attributes?.url)),
+  } : null;
+
+  // Highlight articles
+  const highlightArticles = (attrs.HighlightArticles || []).map((a: any) => ({
+    title: a.title || '',
+    url: a.url || '',
+    publication: a.publication || '',
+    coverImage: resolveUrl(a.coverImage?.data?.attributes?.url),
+  }));
+
   const artist = {
     _id: String(item.id),
     _createdAt: attrs.createdAt,
@@ -80,12 +120,18 @@ export async function getArtistWithProjects(slug: string) {
     slug: attrs.slug || slug,
     signature: attrs.signature || '',
     spotifyEmbedUrl: attrs.spotifyEmbedUrl || undefined,
-    youtubeUrl: attrs.youtubeUrl || undefined,
+    mp3Url: attrs.mp3Url || undefined,
+    bandsintownUrl: attrs.bandsintownUrl || undefined,
+    soundkickUrl: attrs.soundkickUrl || undefined,
     about: aboutText,
     profileImage: resolveUrl(attrs.profileImage?.data?.attributes?.url),
     backgroundImage: attrs.backgroundImage?.data?.attributes?.url
       ? resolveUrl(attrs.backgroundImage.data.attributes.url) : undefined,
     socialMediaLinks: (attrs.socialMediaLinks || []).filter((l: any) => l.url),
+    musicVideos,
+    epk,
+    highlightArticles,
+    artistType: attrs.artistType || '',
   };
 
   return { artist, projects };
