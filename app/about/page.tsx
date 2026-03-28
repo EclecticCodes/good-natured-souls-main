@@ -65,7 +65,7 @@ export default function AboutPage() {
       .catch(() => {});
   }, []);
 
-  const officialRoster = rosterArtists.filter((a) => a.artistType === "roster");
+  const officialRoster = rosterArtists.filter((a) => a.artistType === "roster" || a.artistType === "spotlight");
   const affiliates = rosterArtists.filter((a) => a.artistType === "affiliate");
   const spotlights = rosterArtists.filter((a) => a.artistType === "spotlight");
 

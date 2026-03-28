@@ -62,7 +62,7 @@ const ArtistList = () => {
       .catch(() => {});
   }, []);
 
-  const roster = allArtists.filter((a) => a.artistType === "roster");
+  const roster = allArtists.filter((a) => a.artistType === "roster" || a.artistType === "spotlight");
   const affiliates = allArtists.filter((a) => a.artistType === "affiliate");
   const activeArtists = activeSection === "roster" ? roster : affiliates;
 
@@ -91,9 +91,19 @@ const ArtistList = () => {
     if (sectionArtists.length > 0) setSelectedArtist(sectionArtists[0]);
   };
 
-  if (allArtists.length === 0) return (
-    <div className="flex items-center justify-center py-24">
-      <p className="font-oswald text-gray-600 tracking-widest">LOADING ARTISTS...</p>
+  const [hasMounted, setHasMounted] = React.useState(false);
+  React.useEffect(() => { setHasMounted(true); }, []);
+
+  if (!hasMounted || allArtists.length === 0) return (
+    <div className="py-8 max-w-5xl mx-auto px-4">
+      <div className="flex md:flex-row flex-col-reverse items-center justify-center gap-8">
+        <div className="flex flex-col gap-4 w-full md:w-1/2">
+          {[1,2,3].map(i => (
+            <div key={i} className="h-10 bg-secondaryInteraction rounded animate-pulse" style={{width: `${60 + i * 10}%`}} />
+          ))}
+        </div>
+        <div className="w-48 h-64 bg-secondaryInteraction rounded animate-pulse" />
+      </div>
     </div>
   );
 
