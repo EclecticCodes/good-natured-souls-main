@@ -8,20 +8,20 @@ type Props = {
   coverImage?: string;
 };
 
-export default function ProductDisplay3D({ type, name, artist }: Props) {
+export default function ProductDisplay3D({ type, name, artist, coverImage }: Props) {
   const id = Math.random().toString(36).slice(2, 8);
 
   if (type === 'vinyl') {
-    return <VinylDisplay id={id} name={name} artist={artist} />;
+    return <VinylDisplay id={id} name={name} artist={artist} coverImage={coverImage} />;
   }
   if (type === 'digital') {
-    return <DigitalDisplay id={id} name={name} artist={artist} />;
+    return <DigitalDisplay id={id} name={name} artist={artist} coverImage={coverImage} />;
   }
-  // Default: translucent box (CD / physical)
-  return <BoxDisplay id={id} name={name} artist={artist} />;
+  // Default: CD case
+  return <BoxDisplay id={id} name={name} artist={artist} coverImage={coverImage} />;
 }
 
-function BoxDisplay({ id, name, artist }: { id: string; name: string; artist: string }) {
+function BoxDisplay({ id, name, artist, coverImage }: { id: string; name: string; artist: string; coverImage?: string }) {
   const rigRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = rigRef.current; if (!el) return;
@@ -58,14 +58,28 @@ function BoxDisplay({ id, name, artist }: { id: string; name: string; artist: st
         <div style={{position:'absolute',width:'100%',height:16,bottom:0,background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.08)',transformOrigin:'bottom center',transform:'rotateX(-90deg)',backfaceVisibility:'hidden'}}/>
         <div style={{position:'absolute',width:16,height:'100%',left:0,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',transformOrigin:'left center',transform:'rotateY(-90deg)',backfaceVisibility:'hidden'}}/>
         <div style={{position:'absolute',width:16,height:'100%',right:0,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.06)',transformOrigin:'right center',transform:'rotateY(90deg)',backfaceVisibility:'hidden'}}/>
-        <div style={{position:'absolute',inset:0,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.14)',transform:'translateZ(8px)',backfaceVisibility:'hidden'}}/>
-        <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(255,255,255,0.1) 0%,transparent 55%)',transform:'translateZ(9px)',pointerEvents:'none'}}/>
+        {/* Front face — cover image or fallback gold */}
+        <div style={{position:'absolute',inset:0,transform:'translateZ(8px)',backfaceVisibility:'hidden',overflow:'hidden',background:'#111',border:'1px solid rgba(255,255,255,0.14)'}}>
+          {coverImage
+            ? <img src={coverImage} alt={name} style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} />
+            : <div style={{width:'100%',height:'100%',background:'conic-gradient(#F0B51E 0deg,#c8940a 90deg,#F0B51E 180deg,#b07800 270deg,#F0B51E 360deg)',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:4}}>
+                <p style={{fontSize:9,letterSpacing:2,color:'#000',fontWeight:700,textAlign:'center',padding:'0 8px',margin:0}}>{name}</p>
+                <p style={{fontSize:7,letterSpacing:1,color:'rgba(0,0,0,0.6)',margin:0}}>{artist}</p>
+              </div>
+          }
+        </div>
+        {/* Glare overlay */}
+        <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(255,255,255,0.12) 0%,transparent 50%)',transform:'translateZ(9px)',pointerEvents:'none'}}/>
+        {/* Spine text on left side */}
+        <div style={{position:'absolute',width:16,height:'100%',left:0,background:'rgba(10,10,10,0.9)',border:'1px solid rgba(255,255,255,0.08)',transformOrigin:'left center',transform:'rotateY(-90deg)',backfaceVisibility:'hidden',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
+          <p style={{fontSize:6,letterSpacing:2,color:'#F0B51E',fontWeight:700,whiteSpace:'nowrap',transform:'rotate(-90deg)',margin:0}}>{name.slice(0,18)}</p>
+        </div>
       </div>
     </div>
   );
 }
 
-function VinylDisplay({ id, name, artist }: { id: string; name: string; artist: string }) {
+function VinylDisplay({ id, name, artist, coverImage }: { id: string; name: string; artist: string; coverImage?: string }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = wrapRef.current; if (!el) return;
@@ -106,8 +120,12 @@ function VinylDisplay({ id, name, artist }: { id: string; name: string; artist: 
               const x1=60+R*Math.cos(a1),y1=60+R*Math.sin(a1),x2=60+R*Math.cos(a2),y2=60+R*Math.sin(a2);
               return <path key={i} d={`M 60 60 L ${x1} ${y1} A ${R} ${R} 0 0 1 ${x2} ${y2} Z`} fill={colors[i]} />;
             })}
-            <circle cx="60" cy="60" r="32" fill="#F0B51E"/>
-            <text x="60" y="57" textAnchor="middle" fontSize="7" fontWeight="bold" letterSpacing="2" fill="#000">GNS</text>
+            {coverImage
+              ? <image href={coverImage} x="28" y="28" width="64" height="64" clipPath="url(#labelClip)" preserveAspectRatio="xMidYMid slice" />
+              : <circle cx="60" cy="60" r="32" fill="#F0B51E"/>
+            }
+            <defs><clipPath id="labelClip"><circle cx="60" cy="60" r="32"/></clipPath></defs>
+            {!coverImage && <text x="60" y="57" textAnchor="middle" fontSize="7" fontWeight="bold" letterSpacing="2" fill="#000">GNS</text>}
             <circle cx="60" cy="60" r="4" fill="#000"/>
             <circle cx="60" cy="60" r="26" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1"/>
             <circle cx="60" cy="60" r="20" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1"/>
