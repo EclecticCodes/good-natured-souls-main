@@ -1,32 +1,31 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { PageWrapper } from "../../Components/PageWrapper";
 
 const GENRES = ["Hip-Hop", "R&B", "Soul", "Jazz", "Afrobeats", "Pop", "Electronic", "Gospel", "Reggae", "Other"];
-// Artists fetched dynamically from Strapi
 
 export default function SignupPage() {
   const router = useRouter();
-  const fileRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [gnsArtists, setGnsArtists] = useState<string[]>([]);
+  const [form, setForm] = useState({
+    first_name: "", middle_name: "", last_name: "",
+    email: "", password: "", confirm: "",
+    birthday: "", phone: "",
+    genres: [] as string[],
+    favoriteArtists: [] as string[],
+  });
 
   React.useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL || "https://gns-cms-production.up.railway.app"}/api/artists?fields=name&pagination[limit]=50`)
+    fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL || "https://gns-cms-production.up.railway.app"}/api/artists?fields=name&pagination[limit]=50&sort=orderRank:asc`)
       .then(r => r.json())
       .then(d => setGnsArtists((d.data || []).map((a: any) => a.attributes?.name || a.name).filter(Boolean)))
       .catch(() => {});
   }, []);
-
-  const [error, setError] = useState("");
-  const [avatar, setAvatar] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: "", email: "", password: "", confirm: "",
-    phone: "", birthday: "", genres: [] as string[], favoriteArtists: [] as string[],
-  });
 
   const update = (field: string, value: any) => setForm(prev => ({ ...prev, [field]: value }));
   const toggleArray = (field: "genres" | "favoriteArtists", value: string) => {
@@ -36,17 +35,10 @@ export default function SignupPage() {
     }));
   };
 
-  const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setAvatar(reader.result as string);
-    reader.readAsDataURL(file);
-  };
-
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) { setError("Please enter your name."); return; }
+    if (!form.first_name.trim()) { setError("First name is required."); return; }
+    if (!form.last_name.trim()) { setError("Last name is required."); return; }
     if (!form.email.includes("@")) { setError("Please enter a valid email."); return; }
     if (form.password !== form.confirm) { setError("Passwords do not match."); return; }
     if (form.password.length < 8) { setError("Password must be at least 8 characters."); return; }
@@ -60,23 +52,30 @@ export default function SignupPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, password: form.password, name: form.name }),
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password,
+          first_name: form.first_name,
+          middle_name: form.middle_name,
+          last_name: form.last_name,
+          birthday: form.birthday,
+        }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Registration failed."); setLoading(false); return; }
 
-      // Save extra profile info
-      await fetch("/api/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          phone: form.phone,
-          birthday: form.birthday,
-          genres: form.genres,
-          favorite_artists: form.favoriteArtists,
-        }),
-      });
+      // Save preferences
+      if (form.genres.length > 0 || form.favoriteArtists.length > 0 || form.phone) {
+        await fetch("/api/profile", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phone: form.phone,
+            genres: form.genres,
+            favorite_artists: form.favoriteArtists,
+          }),
+        });
+      }
 
       await signIn("credentials", { email: form.email, password: form.password, redirect: false });
       router.push("/auth/welcome");
@@ -84,7 +83,10 @@ export default function SignupPage() {
     setLoading(false);
   };
 
-  const handleGoogle = () => signIn("google", { callbackUrl: "/auth/welcome" });
+  const handleGoogle = () => signIn("google", { callbackUrl: "/account" });
+
+  const inputClass = "w-full bg-primary border border-secondaryInteraction text-white px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors placeholder-gray-600";
+  const labelClass = "font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-2";
 
   return (
     <PageWrapper>
@@ -103,6 +105,7 @@ export default function SignupPage() {
               <div className="flex-1 py-3.5 text-center font-oswald text-xs tracking-widest text-accent font-bold border-b-2 border-accent -mb-px cursor-default">CREATE ACCOUNT</div>
             </div>
 
+            {/* Step indicator */}
             <div className="flex border-b border-secondaryInteraction">
               <div className={"flex-1 h-0.5 transition-colors " + (step >= 1 ? "bg-accent" : "bg-secondaryInteraction")} />
               <div className={"flex-1 h-0.5 transition-colors " + (step >= 2 ? "bg-accent" : "bg-secondaryInteraction")} />
@@ -128,22 +131,38 @@ export default function SignupPage() {
                   </div>
 
                   <form onSubmit={handleNext} className="flex flex-col gap-4">
-                    <div>
-                      <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-2">Full Name</label>
-                      <input type="text" value={form.name} onChange={e => update("name", e.target.value)} placeholder="Your name" className="w-full bg-primary border border-secondaryInteraction text-white px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors placeholder-gray-600" required />
+                    {/* Name fields */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className={labelClass}>First Name <span className="text-accent">*</span></label>
+                        <input type="text" value={form.first_name} onChange={e => update("first_name", e.target.value)} placeholder="First" className={inputClass} required />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Last Name <span className="text-accent">*</span></label>
+                        <input type="text" value={form.last_name} onChange={e => update("last_name", e.target.value)} placeholder="Last" className={inputClass} required />
+                      </div>
                     </div>
                     <div>
-                      <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-2">Email</label>
-                      <input type="email" value={form.email} onChange={e => update("email", e.target.value)} placeholder="your@email.com" className="w-full bg-primary border border-secondaryInteraction text-white px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors placeholder-gray-600" required />
+                      <label className={labelClass}>Middle Name <span className="text-gray-600">(optional)</span></label>
+                      <input type="text" value={form.middle_name} onChange={e => update("middle_name", e.target.value)} placeholder="Middle" className={inputClass} />
                     </div>
                     <div>
-                      <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-2">Password</label>
-                      <input type="password" value={form.password} onChange={e => update("password", e.target.value)} placeholder="Min 8 characters" className="w-full bg-primary border border-secondaryInteraction text-white px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors placeholder-gray-600" required />
+                      <label className={labelClass}>Email <span className="text-accent">*</span></label>
+                      <input type="email" value={form.email} onChange={e => update("email", e.target.value)} placeholder="your@email.com" autoComplete="email" className={inputClass} required />
                     </div>
                     <div>
-                      <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-2">Confirm Password</label>
-                      <input type="password" value={form.confirm} onChange={e => update("confirm", e.target.value)} placeholder="Repeat password" className="w-full bg-primary border border-secondaryInteraction text-white px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors placeholder-gray-600" required />
+                      <label className={labelClass}>Password <span className="text-accent">*</span></label>
+                      <input type="password" value={form.password} onChange={e => update("password", e.target.value)} placeholder="Min 8 characters" className={inputClass} required />
                     </div>
+                    <div>
+                      <label className={labelClass}>Confirm Password <span className="text-accent">*</span></label>
+                      <input type="password" value={form.confirm} onChange={e => update("confirm", e.target.value)} placeholder="Repeat password" className={inputClass} required />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Birthday <span className="text-gray-600">(optional — cannot be changed later)</span></label>
+                      <input type="date" value={form.birthday} onChange={e => update("birthday", e.target.value)} className={inputClass} />
+                    </div>
+
                     {error && <div className="border border-red-500/30 bg-red-500/10 px-4 py-2"><p className="text-red-400 text-xs font-oswald tracking-widest">{error}</p></div>}
                     <button type="submit" className="bg-accent text-primary font-oswald font-bold text-sm py-4 tracking-widest hover:bg-accentInteraction transition-colors">NEXT</button>
                   </form>
@@ -157,32 +176,18 @@ export default function SignupPage() {
 
               {step === 2 && (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                  <div className="text-center">
-                    <div className="w-20 h-20 rounded-full border-2 border-accent mx-auto mb-2 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-80 transition-opacity" onClick={() => fileRef.current?.click()}>
-                      {avatar ? <img src={avatar} alt="Avatar" className="w-full h-full object-cover" /> : (
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-accent text-xl font-bold">+</span>
-                          <p className="font-oswald text-xs text-gray-600">PHOTO</p>
-                        </div>
-                      )}
-                    </div>
-                    <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-                    <p className="text-gray-600 text-xs">Optional profile photo</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-2">Phone</label>
-                      <input type="tel" value={form.phone} onChange={e => update("phone", e.target.value)} placeholder="+1 (555) 000-0000" className="w-full bg-primary border border-secondaryInteraction text-white px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors placeholder-gray-600" />
-                    </div>
-                    <div>
-                      <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-2">Birthday</label>
-                      <input type="date" value={form.birthday} onChange={e => update("birthday", e.target.value)} className="w-full bg-primary border border-secondaryInteraction text-white px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors" />
-                    </div>
+                  <div className="text-center mb-2">
+                    <p className="font-oswald text-sm font-bold tracking-widest">{form.first_name} {form.last_name}</p>
+                    <p className="text-gray-500 text-xs">{form.email}</p>
                   </div>
 
                   <div>
-                    <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-3">Favorite GNS Artists</label>
+                    <label className={labelClass}>Phone <span className="text-gray-600">(optional)</span></label>
+                    <input type="tel" value={form.phone} onChange={e => update("phone", e.target.value)} placeholder="+1 (555) 000-0000" className={inputClass} />
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Favorite GNS Artists</label>
                     <div className="flex flex-wrap gap-2">
                       {gnsArtists.map(artist => (
                         <button key={artist} type="button" onClick={() => toggleArray("favoriteArtists", artist)}
@@ -194,7 +199,7 @@ export default function SignupPage() {
                   </div>
 
                   <div>
-                    <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-3">Music Preferences</label>
+                    <label className={labelClass}>Music Preferences</label>
                     <div className="flex flex-wrap gap-2">
                       {GENRES.map(genre => (
                         <button key={genre} type="button" onClick={() => toggleArray("genres", genre)}

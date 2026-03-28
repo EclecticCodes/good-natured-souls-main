@@ -106,7 +106,7 @@ export default function AccountPage() {
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [addressForm, setAddressForm] = useState({ label: "Home", name: "", line1: "", line2: "", city: "", state: "NY", zip: "", country: "US", is_default: false });
-  const [settingsForm, setSettingsForm] = useState({ name: "", phone: "", birthday: "", genres: [] as string[], favorite_artists: [] as string[] });
+  const [settingsForm, setSettingsForm] = useState({ first_name: "", middle_name: "", last_name: "", phone: "", birthday: "", genres: [] as string[], favorite_artists: [] as string[] });
   const [editingBirthday, setEditingBirthday] = useState(false);
   const [nameChangesLeft, setNameChangesLeft] = useState(MAX_NAME_CHANGES);
 
@@ -140,14 +140,16 @@ export default function AccountPage() {
         const changes = c.name_changes || 0;
         setNameChangesLeft(MAX_NAME_CHANGES - changes);
         setSettingsForm({
-          name: c.name || session?.user?.name || "",
+          first_name: c.first_name || "",
+          middle_name: c.middle_name || "",
+          last_name: c.last_name || "",
           phone: c.phone || "",
           birthday: c.birthday || "",
           genres: c.genres || [],
           favorite_artists: c.favorite_artists || [],
         });
       } else {
-        setSettingsForm(f => ({ ...f, name: session?.user?.name || "" }));
+        setSettingsForm(f => ({ ...f, first_name: session?.user?.name?.split(' ')[0] || "" }));
       }
     } finally { setLoading(false); }
   }, [session]);
@@ -448,22 +450,27 @@ export default function AccountPage() {
               <div className="border border-secondaryInteraction p-5">
                 <h3 className="font-oswald text-sm font-bold tracking-widest uppercase text-accent mb-4">Personal Info</h3>
                 <div className="flex flex-col gap-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className={labelClass} style={{marginBottom:0}}>Display Name</label>
-                      <span className="font-oswald text-xs text-gray-600 tracking-widest">
-                        {nameChangesLeft > 0 ? `${nameChangesLeft} change${nameChangesLeft !== 1 ? 's' : ''} remaining` : 'No changes remaining'}
-                      </span>
-                    </div>
-                    <input
-                      value={settingsForm.name}
-                      onChange={e => setSettingsForm(f => ({ ...f, name: e.target.value }))}
-                      placeholder="Your name"
-                      disabled={nameChangesLeft === 0}
-                      className={inputClass + (nameChangesLeft === 0 ? " opacity-40 cursor-not-allowed" : "")}
-                    />
-                    {nameChangesLeft === 0 && <p className="text-xs text-gray-600 mt-1">Name change limit reached. Contact support to update.</p>}
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-oswald text-xs text-gray-500 uppercase tracking-widest">Name</span>
+                    <span className="font-oswald text-xs text-gray-600 tracking-widest">
+                      {nameChangesLeft > 0 ? `${nameChangesLeft} change${nameChangesLeft !== 1 ? 's' : ''} remaining` : 'No changes remaining'}
+                    </span>
                   </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={labelClass}>First Name <span className="text-accent">*</span></label>
+                      <input value={settingsForm.first_name} onChange={e => setSettingsForm(f => ({ ...f, first_name: e.target.value }))} placeholder="First" disabled={nameChangesLeft === 0} className={inputClass + (nameChangesLeft === 0 ? " opacity-40 cursor-not-allowed" : "")} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Last Name <span className="text-accent">*</span></label>
+                      <input value={settingsForm.last_name} onChange={e => setSettingsForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Last" disabled={nameChangesLeft === 0} className={inputClass + (nameChangesLeft === 0 ? " opacity-40 cursor-not-allowed" : "")} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Middle Name <span className="text-gray-600">(optional)</span></label>
+                    <input value={settingsForm.middle_name} onChange={e => setSettingsForm(f => ({ ...f, middle_name: e.target.value }))} placeholder="Middle" className={inputClass} />
+                  </div>
+                  {nameChangesLeft === 0 && <p className="text-xs text-gray-600 mt-1">Name change limit reached. Contact support to update.</p>}
                   <div>
                     <label className={labelClass}>Phone</label>
                     <input value={settingsForm.phone} onChange={e => setSettingsForm(f => ({ ...f, phone: e.target.value }))} placeholder="+1 (555) 000-0000" className={inputClass} />
