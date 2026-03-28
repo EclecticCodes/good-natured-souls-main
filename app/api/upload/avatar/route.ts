@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
     const result = await new Promise<any>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: 'gns/avatars',
-          public_id: `avatar-${slug}`,
+          folder: 'fans/avatars',
+          public_id: `avatar-${slug}-${Date.now()}`,
           overwrite: true,
           transformation: [
             { width: 400, height: 400, crop: 'fill', gravity: 'face' },

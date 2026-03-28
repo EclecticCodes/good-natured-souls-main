@@ -253,7 +253,11 @@ export default function AccountPage() {
                   fd.append('file', file);
                   const res = await fetch('/api/upload/avatar', { method: 'POST', body: fd });
                   const data = await res.json();
-                  if (data.url) setAvatar(data.url);
+                  if (data.url) {
+                    setAvatar(data.url);
+                    // Dispatch event so navbar can update
+                    window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { url: data.url } }));
+                  }
                   setUploadingAvatar(false);
                 }} />
                 {uploadingAvatar
