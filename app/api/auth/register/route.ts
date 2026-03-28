@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const password_hash = await bcrypt.hash(password, 12);
     const full_name = [first_name, middle_name, last_name].filter(Boolean).join(' ');
     const encryptedBirthday = birthday ? encrypt(birthday) : null;
-    const encryptedPhone = null;
+    const birthdaySet = birthday ? true : false;
 
     await sql`
       INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, birthday, birthday_set, theme_artist)
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         ${full_name},
         ${password_hash},
         ${encryptedBirthday},
-        ${!!birthday},
+        ${birthdaySet},
         ${theme_artist || null}
       )
     `;
