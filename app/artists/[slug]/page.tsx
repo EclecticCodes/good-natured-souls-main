@@ -22,9 +22,7 @@ const ArtistPage = async ({ params }: Props) => {
     );
   }
 
-  const aboutText = artist.about
-    ? artist.about.map((block: any) => block.children?.map((c: any) => c.text).join("")).join("\n\n")
-    : null;
+  const aboutText = artist.about || null;
 
   return (
     <PageWrapper>
@@ -125,6 +123,27 @@ const ArtistPage = async ({ params }: Props) => {
             <div className="mb-16">
               <p className="font-oswald text-xs tracking-[6px] text-accent uppercase mb-6">Listen</p>
               <TopTracks spotifyEmbedUrl={artist.spotifyEmbedUrl} />
+            </div>
+          )}
+
+          {/* YouTube video */}
+          {artist.youtubeUrl && (
+            <div className="mb-16">
+              <p className="font-oswald text-xs tracking-[6px] text-accent uppercase mb-6">Watch</p>
+              <div className="aspect-video w-full max-w-2xl overflow-hidden">
+                <iframe
+                  src={(() => {
+                    const url = artist.youtubeUrl;
+                    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+                    return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+                  })()}
+                  width="100%"
+                  height="100%"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ border: 'none' }}
+                />
+              </div>
             </div>
           )}
 

@@ -26,35 +26,68 @@ export async function getArtists() {
 }
 
 export async function getArtistWithProjects(slug: string) {
-  const res = await fetch(`${STRAPI_URL}/api/artists?filters[slug][$eq]=${slug}&populate=profileImage,backgroundImage,socialMediaLinks,projects.cover`, {
-    cache: 'no-store'
-  });
+  const res = await fetch(
+    `${STRAPI_URL}/api/artists?filters[slug][$eq]=${slug}&populate=profileImage,backgroundImage,socialMediaLinks,projects.cover`,
+    { cache: 'no-store' }
+  );
   if (!res.ok) throw new Error('Failed to fetch artist');
   const json = await res.json();
   const item = json.data?.[0];
   if (!item) return { artist: null, projects: [] };
   const attrs = item.attributes;
+
+  // Fetch full project details separately to get all fields
+  const projectIds = (attrs.projects?.data || []).map((p: any) => p.id);
+  let projects: any[] = [];
+  if (projectIds.length > 0) {
+    try {
+      const projectsRes = await fetch(
+        `${STRAPI_URL}/api/projects?filters[id][$in]=${projectIds.join(',')}&populate=cover&sort=releaseYear:desc`,
+        { cache: 'no-store' }
+      );
+      if (projectsRes.ok) {
+        const projectsJson = await projectsRes.json();
+        projects = (projectsJson.data || []).map((p: any) => ({
+          _id: String(p.id),
+          name: p.attributes.name || '',
+          type: p.attributes.type || 'Album',
+          url: p.attributes.url || '#',
+          releaseYear: p.attributes.releaseYear || '',
+          coverImageUrl: resolveUrl(p.attributes.cover?.data?.attributes?.url),
+        }));
+      }
+    } catch {}
+  }
+
+  // Parse about rich text safely
+  const aboutText = (() => {
+    if (!attrs.about) return undefined;
+    if (typeof attrs.about === 'string') return attrs.about;
+    if (Array.isArray(attrs.about)) {
+      return attrs.about.map((block: any) => {
+        if (block.children) return block.children.map((c: any) => c.text || '').join('');
+        if (block.text) return block.text;
+        return '';
+      }).filter(Boolean).join('\n\n');
+    }
+    return undefined;
+  })();
+
   const artist = {
     _id: String(item.id),
     _createdAt: attrs.createdAt,
-    name: attrs.name,
-    slug: attrs.slug,
-    signature: attrs.signature,
+    name: attrs.name || '',
+    slug: attrs.slug || slug,
+    signature: attrs.signature || '',
     spotifyEmbedUrl: attrs.spotifyEmbedUrl || undefined,
-    about: attrs.about || undefined,
+    youtubeUrl: attrs.youtubeUrl || undefined,
+    about: aboutText,
     profileImage: resolveUrl(attrs.profileImage?.data?.attributes?.url),
     backgroundImage: attrs.backgroundImage?.data?.attributes?.url
       ? resolveUrl(attrs.backgroundImage.data.attributes.url) : undefined,
-    socialMediaLinks: attrs.socialMediaLinks || [],
+    socialMediaLinks: (attrs.socialMediaLinks || []).filter((l: any) => l.url),
   };
-  const projects = (attrs.projects?.data || []).map((p: any) => ({
-    _id: String(p.id),
-    name: p.attributes.name,
-    type: p.attributes.type,
-    url: p.attributes.url,
-    releaseYear: p.attributes.releaseYear,
-    coverImageUrl: resolveUrl(p.attributes.cover?.data?.attributes?.url),
-  }));
+
   return { artist, projects };
 }
 
