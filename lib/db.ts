@@ -89,3 +89,31 @@ export async function initCustomerSchema() {
 
   console.log('Customer schema initialized');
 }
+
+export async function initNotificationsSchema() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id SERIAL PRIMARY KEY,
+      customer_email VARCHAR(255) NOT NULL,
+      type VARCHAR(50) DEFAULT 'general',
+      title VARCHAR(255) NOT NULL,
+      message TEXT NOT NULL,
+      link VARCHAR(500),
+      link_label VARCHAR(100),
+      read BOOLEAN DEFAULT false,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS show_rsvps (
+      id SERIAL PRIMARY KEY,
+      customer_email VARCHAR(255) NOT NULL,
+      show_id VARCHAR(255) NOT NULL,
+      show_title VARCHAR(255),
+      type VARCHAR(20) DEFAULT 'notify',
+      created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(customer_email, show_id, type)
+    )
+  `;
+}

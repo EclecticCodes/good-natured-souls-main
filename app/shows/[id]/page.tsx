@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useCart } from '../../context/CartContext';
 import { PageWrapper } from '../../Components/PageWrapper';
 import Header from '../../Components/Header';
@@ -131,6 +132,10 @@ export default function ShowPage({ params: paramsRaw }: any) {
   const [show, setShow] = useState<Show | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const { data: session } = useSession();
+  const [rsvpTypes, setRsvpTypes] = useState<string[]>([]);
+  const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [rsvpToast, setRsvpToast] = useState('');
 
   const isInCart = show ? items.some((i) => i.id === `strapi-${show.id}`) : false;
 
@@ -169,7 +174,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
       } catch { setNotFound(true); }
       setLoading(false);
     };
-    fetchShow();
+    if (resolvedId) fetchShow();
   }, [resolvedId]);
 
   const handleBuyTicket = () => {
@@ -287,6 +292,37 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
               )}
 
               <PlatformEmbed platform={show.ticketPlatform} ticketUrl={show.ticketUrl} />
+
+              {/* RSVP / Notify / Presale */}
+              <div className='border border-secondaryInteraction p-4 mt-4'>
+                <p className='font-oswald text-xs tracking-widest text-gray-500 uppercase mb-3'>More Options</p>
+                <div className='flex flex-col gap-2'>
+                  {!rsvpTypes.includes('rsvp') ? (
+                    <button onClick={() => handleRsvp('rsvp')} disabled={rsvpLoading}
+                      className='font-oswald text-xs font-bold px-4 py-2.5 tracking-widest border border-accent text-accent hover:bg-accent hover:text-primary transition-colors w-full'>
+                      ✓ RSVP — I'M GOING
+                    </button>
+                  ) : (
+                    <div className='font-oswald text-xs text-accent tracking-widest px-4 py-2.5 border border-accent/40 text-center'>✓ RSVP CONFIRMED</div>
+                  )}
+                  {!rsvpTypes.includes('presale') ? (
+                    <button onClick={() => handleRsvp('presale')} disabled={rsvpLoading}
+                      className='font-oswald text-xs font-bold px-4 py-2.5 tracking-widest border border-secondaryInteraction text-gray-400 hover:border-accent hover:text-accent transition-colors w-full'>
+                      🔑 JOIN PRESALE LIST
+                    </button>
+                  ) : (
+                    <div className='font-oswald text-xs text-gray-500 tracking-widest px-4 py-2.5 border border-secondaryInteraction text-center'>✓ ON PRESALE LIST</div>
+                  )}
+                  {!rsvpTypes.includes('notify') ? (
+                    <button onClick={() => handleRsvp('notify')} disabled={rsvpLoading}
+                      className='font-oswald text-xs font-bold px-4 py-2.5 tracking-widest border border-secondaryInteraction text-gray-400 hover:border-accent hover:text-accent transition-colors w-full'>
+                      🔔 NOTIFY WHEN TICKETS DROP
+                    </button>
+                  ) : (
+                    <div className='font-oswald text-xs text-gray-500 tracking-widest px-4 py-2.5 border border-secondaryInteraction text-center'>✓ NOTIFICATIONS ON</div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -298,6 +334,11 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
           )}
         </div>
       </main>
+    {rsvpToast && (
+        <div className='fixed bottom-6 left-1/2 -translate-x-1/2 bg-primary border border-accent text-white font-oswald text-xs px-6 py-3 tracking-widest z-50 whitespace-nowrap'>
+          {rsvpToast}
+        </div>
+      )}
     </PageWrapper>
   );
 }

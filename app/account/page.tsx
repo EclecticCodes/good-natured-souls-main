@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { PageWrapper } from "../Components/PageWrapper";
 import Header from "../Components/Header";
 
-type Tab = "overview" | "orders" | "wishlist" | "addresses" | "settings";
+type Tab = "overview" | "orders" | "wishlist" | "addresses" | "settings" | "notifications";
 
 type OrderItem = {
   name: string;
@@ -20,6 +20,17 @@ type OrderItem = {
   soundcloudUrl?: string;
   tidalUrl?: string;
   coverImage?: string;
+};
+
+type Notification = {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  link?: string;
+  link_label?: string;
+  read: boolean;
+  created_at: string;
 };
 
 type Order = {
@@ -101,6 +112,8 @@ export default function AccountPage() {
   const [gnsArtists, setGnsArtists] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [expandedNotif, setExpandedNotif] = useState<number | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -122,17 +135,19 @@ export default function AccountPage() {
     setLoading(true);
     try {
       const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://gns-cms-production.up.railway.app';
-      const [ordersRes, wishlistRes, addressesRes, profileRes, artistsRes] = await Promise.all([
+      const [ordersRes, wishlistRes, addressesRes, profileRes, artistsRes, notifsRes] = await Promise.all([
         fetch("/api/orders"),
         fetch("/api/wishlist"),
         fetch("/api/addresses"),
         fetch("/api/profile"),
         fetch(`${strapiUrl}/api/artists?fields=name&pagination[limit]=50&sort=orderRank:asc`),
+        fetch("/api/notifications"),
       ]);
-      const [ordersData, wishlistData, addressesData, profileData, artistsData] = await Promise.all([
-        ordersRes.json(), wishlistRes.json(), addressesRes.json(), profileRes.json(), artistsRes.json(),
+      const [ordersData, wishlistData, addressesData, profileData, artistsData, notifsData] = await Promise.all([
+        ordersRes.json(), wishlistRes.json(), addressesRes.json(), profileRes.json(), artistsRes.json(), notifsRes.json(),
       ]);
       setOrders(ordersData.orders || []);
+      setNotifications(notifsData.notifications || []);
       setWishlist(wishlistData.items || []);
       setAddresses(addressesData.addresses || []);
       setGnsArtists((artistsData.data || []).map((a: any) => a.attributes?.name || a.name).filter(Boolean));
@@ -467,6 +482,54 @@ export default function AccountPage() {
                   </div>
                 </form>
               )}
+            </div>
+          )}
+
+          {/* NOTIFICATIONS */}
+          {tab === "notifications" && (
+            <div className="flex flex-col gap-3">
+              {notifications.length > 0 && notifications.some(n => !n.read) && (
+                <button onClick={async () => {
+                  await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ readAll: true }) });
+                  setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                }} className="font-oswald text-xs text-gray-500 tracking-widest hover:text-accent transition-colors text-right">
+                  MARK ALL READ
+                </button>
+              )}
+              {notifications.length === 0 ? (
+                <div className="border border-secondaryInteraction p-12 text-center">
+                  <p className="font-oswald text-gray-500 tracking-widest text-sm">NO NOTIFICATIONS YET</p>
+                </div>
+              ) : notifications.map(notif => (
+                <div key={notif.id}
+                  className={"border transition-colors cursor-pointer " + (notif.read ? "border-secondaryInteraction opacity-70" : "border-accent")}
+                  onClick={async () => {
+                    setExpandedNotif(expandedNotif === notif.id ? null : notif.id);
+                    if (!notif.read) {
+                      await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: notif.id }) });
+                      setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
+                    }
+                  }}>
+                  <div className="flex items-start gap-3 p-4">
+                    <div className={"w-2 h-2 rounded-full mt-1.5 flex-shrink-0 " + (notif.read ? "bg-gray-600" : "bg-accent")} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-oswald text-sm font-bold">{notif.title}</p>
+                      <p className="text-gray-500 text-xs mt-0.5">{new Date(notif.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                      {expandedNotif === notif.id && (
+                        <div className="mt-3 pt-3 border-t border-secondaryInteraction">
+                          <p className="text-gray-400 text-sm leading-relaxed">{notif.message}</p>
+                          {notif.link && (
+                            <a href={notif.link} className="inline-block mt-3 font-oswald text-xs text-accent tracking-widest hover:underline">
+                              {notif.link_label || 'VIEW'} →
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <span className="font-oswald text-xs text-gray-600 flex-shrink-0">{expandedNotif === notif.id ? '▲' : '▼'}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
