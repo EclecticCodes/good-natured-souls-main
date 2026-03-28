@@ -17,6 +17,7 @@
     "@stripe/stripe-js": "^8.11.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
     "framer-motion": "^12.6.2",
     "next": "^16.2.0",
     "next-auth": "^4.24.13",

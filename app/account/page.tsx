@@ -101,6 +101,8 @@ export default function AccountPage() {
   const [gnsArtists, setGnsArtists] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [toast, setToast] = useState("");
   const [showAddAddress, setShowAddAddress] = useState(false);
@@ -137,6 +139,7 @@ export default function AccountPage() {
       if (profileData.customer) {
         const c = profileData.customer;
         setCustomer(c);
+        if (c.avatar) setAvatar(c.avatar);
         const changes = c.name_changes || 0;
         setNameChangesLeft(MAX_NAME_CHANGES - changes);
         setSettingsForm({
@@ -234,11 +237,30 @@ export default function AccountPage() {
 
           {/* Profile card */}
           <div className="border border-secondaryInteraction p-6 mb-6 flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-secondaryInteraction flex items-center justify-center flex-shrink-0">
-              {session?.user?.image
-                ? <img src={session.user.image} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-                : <span className="font-oswald text-2xl text-accent">{(session?.user?.name || session?.user?.email || "U")[0].toUpperCase()}</span>
-              }
+            <div className="relative flex-shrink-0">
+              <div className="w-16 h-16 rounded-full bg-secondaryInteraction flex items-center justify-center overflow-hidden">
+                {avatar || session?.user?.image
+                  ? <img src={avatar || session?.user?.image || ''} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                  : <span className="font-oswald text-2xl text-accent">{(session?.user?.name || session?.user?.email || "U")[0].toUpperCase()}</span>
+                }
+              </div>
+              <label className="absolute -bottom-1 -right-1 w-6 h-6 bg-accent rounded-full flex items-center justify-center cursor-pointer hover:bg-accentInteraction transition-colors">
+                <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploadingAvatar(true);
+                  const fd = new FormData();
+                  fd.append('file', file);
+                  const res = await fetch('/api/upload/avatar', { method: 'POST', body: fd });
+                  const data = await res.json();
+                  if (data.url) setAvatar(data.url);
+                  setUploadingAvatar(false);
+                }} />
+                {uploadingAvatar
+                  ? <span style={{fontSize:8}} className="text-primary animate-pulse">...</span>
+                  : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3" strokeLinecap="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+                }
+              </label>
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-oswald text-xl font-bold">{session?.user?.name}</p>
