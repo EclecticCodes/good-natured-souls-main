@@ -107,8 +107,35 @@ function VinylDisplay({ id, name, artist, coverImage }: { id: string; name: stri
   },[]);
 
   const W=120,H=120,R=W/2;
+  const labelCanvasRef = useRef<HTMLCanvasElement>(null);
   const grooveAngles=[0,15,30,45,60,75,90,105,120,135,150,165,180,195,210,225,240,255,270,285,300,315,330,345];
   const colors=['#181818','#222','#111','#1c1c1c','#111','#222','#181818','#111','#222','#111','#181818','#222','#111','#1c1c1c','#111','#222','#181818','#111','#222','#111','#181818','#222','#111','#181818'];
+
+  useEffect(() => {
+    if (!coverImage || !labelCanvasRef.current) return;
+    const canvas = labelCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      ctx.clearRect(0, 0, 64, 64);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(32, 32, 32, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(img, 0, 0, 64, 64);
+      ctx.restore();
+      // Center hole
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(32, 32, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    };
+    img.src = coverImage;
+  }, [coverImage]);
 
   return (
     <div style={{width:'100%',height:'100%',perspective:'700px',position:'relative'}}>
@@ -120,12 +147,11 @@ function VinylDisplay({ id, name, artist, coverImage }: { id: string; name: stri
               const x1=60+R*Math.cos(a1),y1=60+R*Math.sin(a1),x2=60+R*Math.cos(a2),y2=60+R*Math.sin(a2);
               return <path key={i} d={`M 60 60 L ${x1} ${y1} A ${R} ${R} 0 0 1 ${x2} ${y2} Z`} fill={colors[i]} />;
             })}
-            {coverImage
-              ? <image href={coverImage} x="28" y="28" width="64" height="64" clipPath="url(#labelClip)" preserveAspectRatio="xMidYMid slice" />
-              : <circle cx="60" cy="60" r="32" fill="#F0B51E"/>
-            }
-            <defs><clipPath id="labelClip"><circle cx="60" cy="60" r="32"/></clipPath></defs>
+            {!coverImage && <circle cx="60" cy="60" r="32" fill="#F0B51E"/>}
             {!coverImage && <text x="60" y="57" textAnchor="middle" fontSize="7" fontWeight="bold" letterSpacing="2" fill="#000">GNS</text>}
+            {coverImage && <foreignObject x="28" y="28" width="64" height="64">
+              <canvas ref={labelCanvasRef} width={64} height={64} style={{width:64,height:64,borderRadius:'50%'}} />
+            </foreignObject>}
             <circle cx="60" cy="60" r="4" fill="#000"/>
             <circle cx="60" cy="60" r="26" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1"/>
             <circle cx="60" cy="60" r="20" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1"/>
@@ -160,7 +186,18 @@ function DigitalDisplay({ id, name, artist, coverImage }: { id: string; name: st
     if (coverImage) {
       coverImg = new Image();
       coverImg.crossOrigin = 'anonymous';
-      coverImg.onload = () => { coverLoaded = true; };
+      coverImg.onload = () => {
+        coverLoaded = true;
+        // Force reassemble so drawUSB picks up the loaded image
+        if (state === 'assembled') {
+          state = 'reassembling';
+          for (const f of fragments) {
+            f.x = f.tx + (Math.random() - 0.5) * 4;
+            f.y = f.ty + (Math.random() - 0.5) * 4;
+            f.alpha = 0.8;
+          }
+        }
+      };
       coverImg.src = coverImage;
     }
 
