@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!-- GNS Radio — Icecast2 config -->
+<!-- Copy to /etc/icecast2/icecast.xml on your VPS -->
+<!-- Change all CHANGEME values before deploying -->
+<icecast>
+  <location>The Bronx, NYC</location>
+  <admin>admin@goodnaturedsouls.com</admin>
+  <limits>
+    <clients>100</clients>
+    <sources>2</sources>
+    <queue-size>524288</queue-size>
+    <client-timeout>30</client-timeout>
+    <header-timeout>15</header-timeout>
+    <source-timeout>10</source-timeout>
+    <burst-on-connect>1</burst-on-connect>
+    <burst-size>65535</burst-size>
+  </limits>
+  <authentication>
+    <!-- Change these passwords before deploying -->
+    <source-password>CHANGEME_SOURCE</source-password>
+    <relay-password>CHANGEME_RELAY</relay-password>
+    <admin-user>admin</admin-user>
+    <admin-password>CHANGEME_ADMIN</admin-password>
+  </authentication>
+  <hostname>radio.goodnaturedsouls.com</hostname>
+  <listen-socket>
+    <port>8000</port>
+  </listen-socket>
+  <mount type="normal">
+    <mount-name>/gns-radio</mount-name>
+    <stream-name>GNS Radio</stream-name>
+    <stream-description>Good Natured Souls — Exist Altruistic</stream-description>
+    <stream-url>https://goodnaturedsouls.com/radio</stream-url>
+    <genre>Hip-Hop / R&amp;B</genre>
+    <public>1</public>
+  </mount>
+  <fileserve>1</fileserve>
+  <paths>
+    <basedir>/usr/share/icecast2</basedir>
+    <logdir>/var/log/icecast2</logdir>
+    <webroot>/usr/share/icecast2/web</webroot>
+    <adminroot>/usr/share/icecast2/admin</adminroot>
+    <alias source="/" destination="/status.xsl"/>
+  </paths>
+  <logging>
+    <accesslog>access.log</accesslog>
+    <errorlog>error.log</errorlog>
+    <loglevel>3</loglevel>
+  </logging>
+  <security>
+    <chroot>0</chroot>
+  </security>
+</icecast>
