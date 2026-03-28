@@ -8,7 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 const headers = [
   { key: "home", name: "Home", route: "/" },
   { key: "artists", name: "Artists", route: "/artists" },
-  // { key: "shows", name: "Shows", route: "/shows" },
+  { key: "shows", name: "Shows", route: "/shows" },
   { key: "store", name: "Store", route: "/store" },
   // { key: "articles", name: "Articles", route: "/articles" },
   // { key: "fanclub", name: "Fan Club", route: "/fanclub" },

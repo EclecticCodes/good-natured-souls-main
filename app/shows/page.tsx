@@ -1,20 +1,20 @@
-"use client";
 import { PageWrapper } from "../Components/PageWrapper";
 import Header from "../Components/Header";
-import ComingSoon from "../Components/ComingSoonShows"; // Import ComingSoon component
+import ComingSoonShows from "../Components/ComingSoonShows";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Shows — Good Natured Souls",
+  description: "Upcoming shows and live events from Good Natured Souls artists.",
+};
 
 export default function ShowsPage() {
   return (
     <PageWrapper>
-      {/* Header Section */}
-      <section className="text-center my-8">
-        <Header>
-          <h1 className="text-4xl font-bold">Shows</h1>
-        </Header>
-      </section>
-
-        <ComingSoon />
-
+      <Header>
+        <h1 className="font-oswald text-4xl md:text-5xl font-bold">Shows</h1>
+      </Header>
+      <ComingSoonShows />
     </PageWrapper>
   );
 }

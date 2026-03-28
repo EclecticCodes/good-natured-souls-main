@@ -105,7 +105,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
     await fetch('/api/mailing-list', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, source: 'shows' }),
+      body: JSON.stringify({ email, source: 'shows', consentGiven: true, consentTimestamp: new Date().toISOString() }),
     });
     setSubscribed(true);
     setSubError('');
