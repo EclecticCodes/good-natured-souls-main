@@ -11,7 +11,7 @@ export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [gnsArtists, setGnsArtists] = useState<string[]>([]);
+  const [gnsArtists, setGnsArtists] = useState<{name: string; profileImage: string}[]>([]);
   const [form, setForm] = useState({
     first_name: "", middle_name: "", last_name: "",
     email: "", password: "", confirm: "",
@@ -21,9 +21,17 @@ export default function SignupPage() {
   });
 
   React.useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL || "https://gns-cms-production.up.railway.app"}/api/artists?fields=name&pagination[limit]=50&sort=orderRank:asc`)
+    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://gns-cms-production.up.railway.app";
+    fetch(`${strapiUrl}/api/artists?populate=profileImage&pagination[limit]=50&sort=orderRank:asc`)
       .then(r => r.json())
-      .then(d => setGnsArtists((d.data || []).map((a: any) => a.attributes?.name || a.name).filter(Boolean)))
+      .then(d => {
+        const mapped = (d.data || []).map((a: any) => {
+          const imgUrl = a.attributes?.profileImage?.data?.attributes?.url || '';
+          const fullUrl = imgUrl.startsWith('http') ? imgUrl : imgUrl ? `${strapiUrl}${imgUrl}` : '';
+          return { name: a.attributes?.name || a.name, profileImage: fullUrl };
+        }).filter((a: any) => a.name);
+        setGnsArtists(mapped);
+      })
       .catch(() => {});
   }, []);
 
@@ -59,6 +67,7 @@ export default function SignupPage() {
           middle_name: form.middle_name,
           last_name: form.last_name,
           birthday: form.birthday,
+          theme_artist: form.theme_artist,
         }),
       });
       const data = await res.json();

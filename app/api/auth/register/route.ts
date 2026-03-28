@@ -7,7 +7,7 @@ const sql = neon(process.env.POSTGRES_URL!);
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, first_name, middle_name, last_name, birthday } = await req.json();
+    const { email, password, first_name, middle_name, last_name, birthday, theme_artist } = await req.json();
 
     if (!email || !password) return NextResponse.json({ error: "Email and password required" }, { status: 400 });
     if (!first_name?.trim()) return NextResponse.json({ error: "First name is required" }, { status: 400 });
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const encryptedPhone = null;
 
     await sql`
-      INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, birthday, birthday_set)
+      INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, birthday, birthday_set, theme_artist)
       VALUES (
         ${email},
         ${first_name.trim()},
@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
         ${full_name},
         ${password_hash},
         ${encryptedBirthday},
-        ${!!birthday}
+        ${!!birthday},
+        ${theme_artist || null}
       )
     `;
 
