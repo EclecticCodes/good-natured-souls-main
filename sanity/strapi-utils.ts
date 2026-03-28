@@ -141,7 +141,7 @@ export async function getAllArtistsWithFeaturedProjects() {
   try {
     const [artistsRes, projectsRes] = await Promise.all([
       fetch(`${STRAPI_URL}/api/artists?populate=profileImage,backgroundImage&sort=orderRank:asc`, { cache: 'no-store' }),
-      fetch(`${STRAPI_URL}/api/projects?populate=cover,artist&sort=createdAt:desc&pagination[limit]=3`, { cache: 'no-store' })
+      fetch(`${STRAPI_URL}/api/projects?populate=cover,artists&sort=createdAt:desc&pagination[limit]=3`, { cache: 'no-store' })
     ]);
     const artistsJson = await artistsRes.json();
     const projectsJson = await projectsRes.json();
@@ -163,7 +163,7 @@ export async function getAllArtistsWithFeaturedProjects() {
       url: item.attributes.url,
       releaseYear: item.attributes.releaseYear,
       coverImageUrl: resolveUrl(item.attributes.cover?.data?.attributes?.url),
-      artist: item.attributes.artist?.data?.attributes?.name || '',
+      artist: item.attributes.artists?.data?.[0]?.attributes?.name || '',
     }));
     return { artists, featuredProjects };
   } catch {
@@ -175,7 +175,7 @@ export async function getHomePageData() {
   try {
     const [artistsRes, projectsRes, mainRes] = await Promise.all([
       fetch(`${STRAPI_URL}/api/artists?populate=profileImage,backgroundImage&sort=orderRank:asc`, { cache: 'no-store' }),
-      fetch(`${STRAPI_URL}/api/projects?populate=cover,artist&sort=releaseYear:desc,createdAt:desc&pagination[limit]=20`, { cache: 'no-store' }),
+      fetch(`${STRAPI_URL}/api/projects?populate=cover,artists&sort=releaseYear:desc,createdAt:desc&pagination[limit]=20`, { cache: 'no-store' }),
       fetch(`${STRAPI_URL}/api/mains?populate=jumbotronImages&pagination[limit]=1`, { cache: 'no-store' }),
     ]);
     const artistsJson = artistsRes.ok ? await artistsRes.json() : { data: [] };
@@ -198,8 +198,8 @@ export async function getHomePageData() {
       url: item.attributes.url || '#',
       releaseYear: item.attributes.releaseYear || new Date().getFullYear(),
       coverImageUrl: resolveUrl(item.attributes.cover?.data?.attributes?.url),
-      artist: item.attributes.artist?.data?.attributes?.name || '',
-      artistSlug: item.attributes.artist?.data?.attributes?.slug || '',
+      artist: item.attributes.artists?.data?.[0]?.attributes?.name || '',
+      artistSlug: item.attributes.artists?.data?.[0]?.attributes?.slug || '',
     }));
     const artistCount: Record<string, number> = {};
     const featuredProjects = allProjects.filter((p: any) => {
