@@ -195,17 +195,7 @@ export default function SignupPage() {
                     <input type="tel" value={form.phone} onChange={e => update("phone", e.target.value)} placeholder="+1 (555) 000-0000" className={inputClass} />
                   </div>
 
-                  <div>
-                    <label className={labelClass}>Favorite GNS Artists</label>
-                    <div className="flex flex-wrap gap-2">
-                      {gnsArtists.map(artist => (
-                        <button key={artist} type="button" onClick={() => toggleArray("favoriteArtists", artist)}
-                          className={"font-oswald text-xs px-3 py-2 border tracking-widest transition-colors " + (form.favoriteArtists.includes(artist) ? "border-accent text-accent bg-secondaryInteraction" : "border-secondaryInteraction text-gray-500 hover:border-accent")}>
-                          {artist}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+
 
                   <div>
                     <label className={labelClass}>Music Preferences</label>
