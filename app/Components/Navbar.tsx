@@ -171,7 +171,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
 
           <div className="flex items-center gap-3">
 {/* Cart */}
-            <a href="/checkout" className="relative p-2 text-gray-400 hover:text-accent transition-colors">
+            <button onClick={() => setCartOpen(true)} className="relative p-2 text-gray-400 hover:text-accent transition-colors">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
               </svg>
@@ -180,7 +180,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
                   {count}
                 </span>
               )}
-            </a>
+            </button>
 
             <div className="hidden md:flex items-center gap-2">
               {session ? (
