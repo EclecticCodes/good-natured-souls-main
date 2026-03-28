@@ -24,12 +24,18 @@ export async function POST(req: NextRequest) {
     const full_name = [fn, mn, ln].filter(Boolean).join(' ');
     const encryptedBirthday = birthday ? encrypt(birthday) : '';
     const ta = theme_artist || '';
-    const birthdaySet = encryptedBirthday !== '';
 
-    await sql`
-      INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, birthday, birthday_set, theme_artist)
-      VALUES (${email}, ${fn}, ${mn}, ${ln}, ${full_name}, ${password_hash}, ${encryptedBirthday}, ${birthdaySet}, ${ta})
-    `;
+    if (encryptedBirthday) {
+      await sql`
+        INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, birthday, birthday_set, theme_artist)
+        VALUES (${email}, ${fn}, ${mn}, ${ln}, ${full_name}, ${password_hash}, ${encryptedBirthday}, true, ${ta})
+      `;
+    } else {
+      await sql`
+        INSERT INTO customers (email, first_name, middle_name, last_name, name, password_hash, birthday_set, theme_artist)
+        VALUES (${email}, ${fn}, ${mn}, ${ln}, ${full_name}, ${password_hash}, false, ${ta})
+      `;
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
