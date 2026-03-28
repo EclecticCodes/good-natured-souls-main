@@ -7,6 +7,14 @@ export type CartItem = {
   price: number;
   quantity: number;
   type: "digital" | "ticket" | "merch" | "vinyl" | "tees" | "hoodies" | "accessories";
+  coverImage?: string;
+  mp3Url?: string;
+  spotifyUrl?: string;
+  appleMusicUrl?: string;
+  bandcampUrl?: string;
+  youtubeUrl?: string;
+  soundcloudUrl?: string;
+  tidalUrl?: string;
 };
 
 type CartContextType = {
@@ -52,6 +60,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
+
   const clearCart = () => {
     setItems([]);
     try { localStorage.removeItem("gns-cart"); } catch {}
