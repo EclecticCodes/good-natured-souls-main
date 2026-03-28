@@ -104,7 +104,7 @@ export const NewMusic = ({ projects }: Props) => {
                         {projects[currentIndex].name.toUpperCase()}
                       </h2>
                       <h3 className="text-3xl w-full md:w-1/2">
-                        <span className="text-accent">{project.type ? project.type.charAt(0).toUpperCase() + project.type.slice(1) : "Album"} • </span>
+                        <span className="text-accent">{projects[currentIndex].type ? projects[currentIndex].type.charAt(0).toUpperCase() + projects[currentIndex].type.slice(1) : "Album"} • </span>
                         {projects[currentIndex].artist}
                         {projects[currentIndex].featuredArtists &&
                           projects[currentIndex].featuredArtists.length > 0 && (
