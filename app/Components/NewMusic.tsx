@@ -94,7 +94,7 @@ export const NewMusic = ({ projects }: Props) => {
               className={`relative z-10 flex flex-col min-h-[75vh] justify-between space-y-8 w-2/3 px-4 bg-transparent`}
             >
               <h1 className="text-5xl md:text-left font-bold text-center">
-                FEATURED RELEASES
+                NEW MUSIC
               </h1>
               <div className="overflow-hidden w-full flex justify-center items-center">
                 <div className="flex w-full">

@@ -8,6 +8,7 @@ const CATEGORIES = [
   { key: 'all', label: 'All' },
   { key: 'digital', label: 'Digital' },
   { key: 'vinyl', label: 'Vinyl' },
+  { key: 'cd', label: 'CD' },
   { key: 'tees', label: 'Tees' },
   { key: 'hoodies', label: 'Hoodies' },
   { key: 'accessories', label: 'Accessories' },
@@ -58,6 +59,7 @@ type Product = {
 function get3DType(category: string): string {
   if (category === 'vinyl') return 'vinyl';
   if (category === 'digital') return 'digital';
+  if (category === 'cd') return 'cd';
   return 'box';
 }
 
@@ -303,7 +305,7 @@ export default function StoreClient({ products, initialCategory, storeSettings }
 
                 {/* Hint for 3D interaction */}
                 <div style={{ marginTop: 12, fontSize: 10, color: '#2a2a2a', textAlign: 'center', letterSpacing: 1 }}>
-                  {selectedProduct.category === 'vinyl' ? 'CLICK · SPIN THE RECORD' : 'HOVER · INTERACT'}
+                  {selectedProduct.category === 'vinyl' ? 'CLICK · SPIN THE RECORD' : selectedProduct.category === 'cd' ? 'HOVER · VIEW CD' : 'HOVER · INTERACT'}
                 </div>
               </div>
 

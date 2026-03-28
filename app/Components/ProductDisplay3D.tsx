@@ -17,7 +17,7 @@ export default function ProductDisplay3D({ type, name, artist, coverImage }: Pro
   if (type === 'digital') {
     return <DigitalDisplay id={id} name={name} artist={artist} coverImage={coverImage} />;
   }
-  // Default: CD case
+  // cd or any physical — CD jewel case
   return <BoxDisplay id={id} name={name} artist={artist} coverImage={coverImage} />;
 }
 
