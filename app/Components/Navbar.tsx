@@ -152,7 +152,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
 
   return (
     <>
-      <nav className={`${isHome ? "fixed" : "sticky"} top-0 left-0 w-full z-50 transition-all duration-300 ${navBg} border-b ${scrolled || !isHome ? "border-secondaryInteraction" : "border-transparent"}`}>
+      <nav className={`${isHome ? "fixed" : "sticky"} top-0 left-0 w-full z-50 transition-all duration-300 ${navBg} border-b ${scrolled || !isHome ? "border-secondaryInteraction" : "border-transparent"} ${menuOpen ? "md:flex hidden" : ""}`}>
         <div className="max-w-screen-xl mx-auto px-4 h-16 flex items-center justify-between">
 
           <motion.a href="/" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}>
@@ -213,7 +213,7 @@ const resolveUrl = (url: string | undefined | null, strapiUrl: string): string =
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="md:hidden fixed inset-0 z-40 flex"
+            className="md:hidden fixed inset-0 z-[60] flex"
           >
             {/* LEFT panel */}
             <motion.div
