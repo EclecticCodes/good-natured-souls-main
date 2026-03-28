@@ -222,6 +222,39 @@ const ArtistPage = async ({ params }: Props) => {
             </div>
           )}
 
+          {/* Booking CTA */}
+          <div className="mb-12 md:mb-16 border border-secondaryInteraction hover:border-accent transition-colors p-6 md:p-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div>
+                <p className="font-oswald text-xs tracking-[6px] text-accent uppercase mb-2">Book This Artist</p>
+                <h3 className="font-oswald text-2xl md:text-3xl font-bold mb-2">{artist.name}</h3>
+                <div className="flex flex-wrap gap-4 text-xs text-gray-500 font-oswald tracking-widest">
+                  {artist.epk?.genre && <span>Genre: {artist.epk.genre}</span>}
+                  {artist.epk?.location && <span>Based in: {artist.epk.location}</span>}
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+                {artist.epk?.bookingEmail ? (
+                  <a href={`mailto:${artist.epk.bookingEmail}?subject=Booking Inquiry — ${artist.name}`}
+                    className="font-oswald text-sm tracking-widest bg-accent text-primary px-6 py-3 hover:bg-accentInteraction transition-colors text-center font-bold">
+                    BOOKING INQUIRY ↗
+                  </a>
+                ) : (
+                  <a href={`/contact?subject=Booking — ${artist.name}`}
+                    className="font-oswald text-sm tracking-widest bg-accent text-primary px-6 py-3 hover:bg-accentInteraction transition-colors text-center font-bold">
+                    BOOKING INQUIRY ↗
+                  </a>
+                )}
+                {artist.epk?.pressEmail && (
+                  <a href={`mailto:${artist.epk.pressEmail}?subject=Press Inquiry — ${artist.name}`}
+                    className="font-oswald text-sm tracking-widest border border-secondaryInteraction hover:border-accent text-gray-400 hover:text-accent px-6 py-3 transition-colors text-center">
+                    PRESS INQUIRY ↗
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Bottom nav */}
           <div className="border-t border-secondaryInteraction pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <Link href="/artists" className="font-oswald text-xs tracking-widest text-gray-500 hover:text-accent transition-colors">
