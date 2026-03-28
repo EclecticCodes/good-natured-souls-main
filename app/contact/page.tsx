@@ -55,11 +55,11 @@ function ContactForm() {
         <h2 className="font-oswald text-2xl font-bold mb-6 tracking-widest">GET IN TOUCH</h2>
         <div className="flex flex-col gap-6 mb-8">
           {[
-            { label: "General", value: "goodnaturedsouls@gmail.com", href: "mailto:goodnaturedsouls@gmail.com" },
+            { label: "General", value: "info@goodnaturedsouls.com", href: "mailto:info@goodnaturedsouls.com" },
             { label: "Booking", value: "booking@goodnaturedsouls.com", href: "/contact?subject=Booking" },
             { label: "Press", value: "press@goodnaturedsouls.com", href: "/contact?subject=Press+%26+Media" },
             { label: "Licensing", value: "licensing@goodnaturedsouls.com", href: "/contact?subject=Licensing" },
-            { label: "Discord", value: "discord.gg/tr6Gybnu", href: "https://discord.gg/tr6Gybnu" },
+
           ].map((item, i) => (
             <div key={i} className="border-b border-secondaryInteraction pb-4">
               <p className="font-oswald text-xs tracking-widest text-gray-500 uppercase mb-1">{item.label}</p>
