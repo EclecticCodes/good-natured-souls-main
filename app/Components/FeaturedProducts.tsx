@@ -53,12 +53,12 @@ const FeaturedProducts = ({ projects }: Props) => {
                 href={project.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border border-secondaryInteraction hover:border-accent transition-colors duration-200 block"
+                className="border border-secondaryInteraction hover:border-accent transition-colors duration-200 block group"
                 whileHover={{ y: -3 }}
               >
                 <div className="aspect-square bg-secondaryInteraction flex items-center justify-center relative overflow-hidden">
                   {project.coverImageUrl ? (
-                    <img src={project.coverImageUrl} alt={project.name} className="w-full h-full object-cover" />
+                    <img src={project.coverImageUrl} alt={project.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   ) : (
                     <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border-4 border-primary">
                       <div className="w-6 h-6 rounded-full bg-accent" />
@@ -67,11 +67,14 @@ const FeaturedProducts = ({ projects }: Props) => {
                   <span className="absolute top-2 left-2 bg-accent text-primary font-oswald text-xs font-bold px-2 py-0.5 tracking-widest">
                     {project.type?.toUpperCase() || "RELEASE"}
                   </span>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="font-oswald text-xs tracking-widest text-white border border-white px-3 py-1.5">LISTEN ↗</span>
+                  </div>
                 </div>
                 <div className="p-3">
                   <p className="text-accent font-oswald text-xs tracking-widest uppercase mb-0.5">{project.artist}</p>
                   <h3 className="font-oswald text-sm md:text-lg font-bold mb-1 leading-tight">{project.name}</h3>
-                  <p className="text-gray-500 text-xs font-oswald tracking-widest">{project.releaseYear} · LISTEN ↗</p>
+                  <p className="text-gray-500 text-xs font-oswald tracking-widest">{project.releaseYear} · {project.type?.toUpperCase() || "RELEASE"}</p>
                 </div>
               </motion.a>
             ))

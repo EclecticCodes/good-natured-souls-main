@@ -175,7 +175,7 @@ export async function getHomePageData() {
   try {
     const [artistsRes, projectsRes, mainRes] = await Promise.all([
       fetch(`${STRAPI_URL}/api/artists?populate=profileImage,backgroundImage&sort=orderRank:asc`, { cache: 'no-store' }),
-      fetch(`${STRAPI_URL}/api/projects?populate=cover,artist&sort=createdAt:desc&pagination[limit]=6`, { cache: 'no-store' }),
+      fetch(`${STRAPI_URL}/api/projects?populate=cover,artist&sort=releaseYear:desc,createdAt:desc&pagination[limit]=20`, { cache: 'no-store' }),
       fetch(`${STRAPI_URL}/api/mains?populate=jumbotronImages&pagination[limit]=1`, { cache: 'no-store' }),
     ]);
     const artistsJson = artistsRes.ok ? await artistsRes.json() : { data: [] };
@@ -190,7 +190,8 @@ export async function getHomePageData() {
       backgroundImage: item.attributes.backgroundImage?.data?.attributes?.url
         ? resolveUrl(item.attributes.backgroundImage.data.attributes.url) : undefined,
     }));
-    const featuredProjects = (projectsJson.data || []).map((item: any) => ({
+    // Cap at 2 projects per artist, sorted by releaseYear desc
+    const allProjects = (projectsJson.data || []).map((item: any) => ({
       _id: String(item.id),
       name: item.attributes.name,
       type: item.attributes.type || 'Album',
@@ -198,7 +199,14 @@ export async function getHomePageData() {
       releaseYear: item.attributes.releaseYear || new Date().getFullYear(),
       coverImageUrl: resolveUrl(item.attributes.cover?.data?.attributes?.url),
       artist: item.attributes.artist?.data?.attributes?.name || '',
+      artistSlug: item.attributes.artist?.data?.attributes?.slug || '',
     }));
+    const artistCount: Record<string, number> = {};
+    const featuredProjects = allProjects.filter((p: any) => {
+      const key = p.artist || 'unknown';
+      artistCount[key] = (artistCount[key] || 0) + 1;
+      return artistCount[key] <= 2;
+    });
     const mainData = mainJson.data?.[0]?.attributes || null;
     const jumbotronImages = (mainData?.jumbotronImages?.data || []).map((img: any) =>
       resolveUrl(img.attributes.url)
