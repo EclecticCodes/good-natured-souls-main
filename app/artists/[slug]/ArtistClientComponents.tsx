@@ -65,15 +65,21 @@ function VideoModal({ video, onClose }: { video: any; onClose: () => void }) {
   );
 }
 
+function getYouTubeThumbnail(url: string): string | null {
+  const match = url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null;
+}
+
 export function VideoCardClient({ video }: { video: any }) {
   const [open, setOpen] = React.useState(false);
+  const thumbnail = video.thumbnailUrl || getYouTubeThumbnail(video.videoUrl);
   return (
     <>
       <button onClick={() => setOpen(true)}
         className="group block border border-secondaryInteraction hover:border-accent transition-colors text-left w-full">
         <div className="aspect-video overflow-hidden bg-secondaryInteraction relative">
-          {video.thumbnailUrl ? (
-            <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          {thumbnail ? (
+            <img src={thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-secondaryInteraction">
               <span className="text-3xl">▶</span>
