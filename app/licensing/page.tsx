@@ -5,12 +5,37 @@ import Header from "../Components/Header";
 
 export default function LicensingPage() {
   const [form, setForm] = useState({ name: "", email: "", company: "", useCase: "", track: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [submitted, setSubmitted] = useState(false);
   const useCases = ["Film & TV", "Advertising", "Video Game", "Podcast", "YouTube / Content Creation", "Live Performance", "Streaming", "Other"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setStatus("loading");
+    try {
+      await fetch("/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "contact",
+          data: {
+            name: form.name,
+            email: form.email,
+            subject: "Licensing",
+            message: `Company: ${form.company}\nUse Case: ${form.useCase}\nTrack: ${form.track}\n\n${form.message}`,
+            source: "licensing",
+            inquiry_type: "licensing",
+            priority: "high",
+            consent_given: true,
+          },
+        }),
+      });
+      setStatus("success");
+      setSubmitted(true);
+      setForm({ name: "", email: "", company: "", useCase: "", track: "", message: "" });
+    } catch {
+      setStatus("error");
+    }
   };
 
   return (
