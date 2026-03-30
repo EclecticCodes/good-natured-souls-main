@@ -1,6 +1,7 @@
 import { getArtistWithProjects } from "../../../sanity/strapi-utils";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import PrintButton from "./PrintButton";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -39,10 +40,7 @@ export default async function EPKPage({ params }: Props) {
       <div style={{ borderBottom: "1px solid #1a1a1a", padding: "16px 40px", display: "flex", alignItems: "center", justifyContent: "space-between" }} className="no-print">
         <a href="/" style={{ fontFamily: "serif", fontSize: 28, color: "#fff", textDecoration: "none", fontWeight: 900 }}>GNS</a>
         <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={() => window.print()}
-            style={{ background: "#F0B51E", color: "#000", border: "none", padding: "10px 24px", fontWeight: 700, cursor: "pointer", fontSize: 12, letterSpacing: 2 }}>
-            DOWNLOAD PDF
-          </button>
+          <PrintButton />
           <a href={`/artists/${slug}`}
             style={{ background: "none", border: "1px solid #2a2a2a", color: "#888", padding: "10px 24px", fontSize: 12, letterSpacing: 2, textDecoration: "none" }}>
             VIEW ARTIST PAGE
