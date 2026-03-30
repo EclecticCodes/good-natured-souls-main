@@ -51,28 +51,15 @@ export async function getArtistWithProjects(slug: string) {
   if (!item) return { artist: null, projects: [] };
   const attrs = item.attributes;
 
-  // Fetch full project details separately to get all fields
-  const projectIds = (attrs.projects?.data || []).map((p: any) => p.id);
-  let projects: any[] = [];
-  if (projectIds.length > 0) {
-    try {
-      const projectsRes = await fetch(
-        `${STRAPI_URL}/api/projects?filters[id][$in]=${projectIds.join(',')}&populate=cover&sort=releaseYear:desc`,
-        { cache: 'no-store' }
-      );
-      if (projectsRes.ok) {
-        const projectsJson = await projectsRes.json();
-        projects = (projectsJson.data || []).map((p: any) => ({
-          _id: String(p.id),
-          name: p.attributes.name || '',
-          type: p.attributes.type || 'Album',
-          url: p.attributes.url || '#',
-          releaseYear: p.attributes.releaseYear || '',
-          coverImageUrl: resolveUrl(p.attributes.cover?.data?.attributes?.url),
-        }));
-      }
-    } catch {}
-  }
+  // Use project data already populated in the artist query
+  const projects: any[] = (attrs.projects?.data || []).map((p: any) => ({
+    _id: String(p.id),
+    name: p.attributes.name || '',
+    type: p.attributes.type || 'Album',
+    url: p.attributes.url || '#',
+    releaseYear: p.attributes.releaseYear || '',
+    coverImageUrl: resolveUrl(p.attributes.cover?.data?.attributes?.url),
+  })).sort((a: any, b: any) => (b.releaseYear || 0) - (a.releaseYear || 0));
 
   // Parse about rich text safely
   const aboutText = (() => {
