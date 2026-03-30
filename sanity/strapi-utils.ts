@@ -40,8 +40,8 @@ export async function getArtistWithProjects(slug: string) {
     `${STRAPI_URL}/api/artists?filters[slug][$eq]=${slug}&populate=${populate}`,
     { cache: 'no-store' }
   );
-  if (!res.ok) throw new Error('Failed to fetch artist');
-  const json = await res.json();
+  if (!res.ok) return { artist: null, projects: [] };
+  const json = await res.json().catch(() => ({ data: [] }));
   const item = json.data?.[0];
   if (!item) return { artist: null, projects: [] };
   const attrs = item.attributes;
