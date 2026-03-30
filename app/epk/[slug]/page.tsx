@@ -37,13 +37,20 @@ export default async function EPKPage({ params }: Props) {
   const hasProjects = projects.length > 0;
 
   return (
-    <div style={{ background: "#080808", color: "#fff", minHeight: "100vh", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+    <div id="epk-root" style={{ background: "#080808", color: "#fff", minHeight: "100vh", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
 
       <style>{`
         @media print {
           body { background: #fff !important; color: #000 !important; }
           .no-print { display: none !important; }
+          .print-only { display: block !important; }
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          footer, nav, header { display: none !important; }
+          #site-footer { display: none !important; }
+          #epk-root { display: block !important; }
+        }
+        @media screen {
+          .print-only { display: none !important; }
         }
         @page { margin: 0.75in; size: A4; }
         .epk-section-label { font-size: 9px; letter-spacing: 4px; color: #F0B51E; text-transform: uppercase; font-weight: 700; margin: 0 0 16px; }
@@ -106,17 +113,17 @@ export default async function EPKPage({ params }: Props) {
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {epk?.bookingEmail && (
                   <a href={`mailto:${epk.bookingEmail}`} style={{ fontSize: 11, color: "#F0B51E", background: "#F0B51E11", border: "1px solid #F0B51E22", padding: "6px 14px", textDecoration: "none", letterSpacing: 1 }}>
-                    📅 Booking
+                    Booking
                   </a>
                 )}
                 {epk?.pressEmail && (
                   <a href={`mailto:${epk.pressEmail}`} style={{ fontSize: 11, color: "#aaa", background: "#ffffff08", border: "1px solid #2a2a2a", padding: "6px 14px", textDecoration: "none", letterSpacing: 1 }}>
-                    📰 Press
+                    Press
                   </a>
                 )}
                 {epk?.website && (
                   <a href={epk.website.startsWith("http") ? epk.website : `https://${epk.website}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "#aaa", background: "#ffffff08", border: "1px solid #2a2a2a", padding: "6px 14px", textDecoration: "none", letterSpacing: 1 }}>
-                    🌐 Website
+                    Website
                   </a>
                 )}
               </div>
