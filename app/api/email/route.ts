@@ -122,65 +122,93 @@ async function saveInquiryToStrapi(data: { name: string; email: string; subject:
 function confirmationEmailHtml(name: string, subject: string, message: string): string {
   return `<!DOCTYPE html>
 <html>
-<body style="margin:0;padding:0;background:#0e0e0e;font-family:'Helvetica Neue',Arial,sans-serif;">
-<div style="max-width:580px;margin:0 auto;background:#161616;border-radius:4px;overflow:hidden;">
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:32px 16px;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#111111;max-width:560px;width:100%;">
 
-  <div style="background:#F0B51E;padding:6px 32px;display:flex;align-items:center;justify-content:space-between;">
-    <span style="font-size:11px;font-weight:700;letter-spacing:4px;color:#000;">GOOD NATURED SOULS</span>
-    <span style="font-size:10px;letter-spacing:2px;color:#000;opacity:0.6;">EXIST ALTRUISTIC</span>
-  </div>
+  <!-- Gold header bar -->
+  <tr>
+    <td style="background:#F0B51E;padding:12px 32px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:11px;font-weight:700;letter-spacing:4px;color:#000000;">GOOD NATURED SOULS</td>
+        <td align="right" style="font-size:9px;letter-spacing:3px;color:#00000077;">EXIST ALTRUISTIC</td>
+      </tr></table>
+    </td>
+  </tr>
 
-  <div style="padding:40px 32px;">
-    <p style="font-size:11px;letter-spacing:4px;color:#F0B51E;margin:0 0 12px;text-transform:uppercase;">Message Received</p>
-    <h1 style="font-size:28px;font-weight:700;color:#ffffff;margin:0 0 8px;letter-spacing:1px;">Thank you, ${name}.</h1>
-    <p style="font-size:14px;color:#888;margin:0 0 32px;line-height:1.6;">We've received your inquiry and will follow up within 24–48 hours.</p>
+  <!-- Main body -->
+  <tr><td style="padding:36px 32px 28px;">
+    <p style="font-size:9px;letter-spacing:4px;color:#F0B51E;margin:0 0 10px;text-transform:uppercase;">Message Received</p>
+    <h1 style="font-size:24px;font-weight:700;color:#ffffff;margin:0 0 8px;">Thank you, ${name}.</h1>
+    <p style="font-size:14px;color:#666666;margin:0 0 28px;line-height:1.7;">We have received your inquiry and will follow up within 24 to 48 hours.</p>
 
-    <div style="border:1px solid #2a2a2a;border-left:3px solid #F0B51E;padding:20px 24px;margin-bottom:32px;border-radius:2px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <span style="font-size:10px;letter-spacing:3px;color:#555;text-transform:uppercase;">Your Inquiry</span>
-        <span style="font-size:10px;font-weight:700;letter-spacing:2px;background:#F0B51E;color:#000;padding:3px 10px;border-radius:2px;">${subject.toUpperCase()}</span>
-      </div>
-      <p style="font-size:13px;color:#aaa;margin:0;line-height:1.7;border-top:1px solid #222;padding-top:14px;">${message}</p>
-    </div>
+    <!-- Inquiry card -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #222222;border-left:3px solid #F0B51E;margin-bottom:32px;">
+      <tr><td style="padding:18px 20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;"><tr>
+          <td style="font-size:9px;letter-spacing:3px;color:#555555;text-transform:uppercase;">Your Inquiry</td>
+          <td align="right" style="font-size:9px;font-weight:700;letter-spacing:1px;background:#F0B51E;color:#000000;padding:3px 10px;">${subject.toUpperCase()}</td>
+        </tr></table>
+        <p style="font-size:13px;color:#aaaaaa;margin:0;line-height:1.8;border-top:1px solid #1e1e1e;padding-top:12px;">${message}</p>
+      </td></tr>
+    </table>
 
-    <div style="margin-bottom:32px;text-align:center;">
-      <p style="font-size:10px;letter-spacing:3px;color:#555;text-transform:uppercase;margin:0 0 20px;">What happens next</p>
-      <div style="display:flex;flex-direction:column;gap:12px;max-width:340px;margin:0 auto;">
-        <div style="display:flex;align-items:flex-start;gap:14px;text-align:left;">
-          <span style="width:22px;height:22px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#F0B51E;font-weight:700;flex-shrink:0;margin-top:1px;">1</span>
-          <p style="font-size:13px;color:#888;margin:0;line-height:1.5;">Our ${subject.toLowerCase()} team reviews your request</p>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:14px;text-align:left;">
-          <span style="width:22px;height:22px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#F0B51E;font-weight:700;flex-shrink:0;margin-top:1px;">2</span>
-          <p style="font-size:13px;color:#888;margin:0;line-height:1.5;">We reach out within 24–48 hours</p>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:14px;text-align:left;">
-          <span style="width:22px;height:22px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#F0B51E;font-weight:700;flex-shrink:0;margin-top:1px;">3</span>
-          <p style="font-size:13px;color:#888;margin:0;line-height:1.5;">We work out the details together</p>
-        </div>
-      </div>
-    </div>
+    <!-- What happens next -->
+    <p style="font-size:9px;letter-spacing:3px;color:#555555;text-transform:uppercase;margin:0 0 16px;text-align:center;">What happens next</p>
 
-    <div style="border-top:1px solid #1e1e1e;margin-bottom:28px;"></div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+      <tr><td style="padding:8px 0;">
+        <table cellpadding="0" cellspacing="0"><tr>
+          <td style="width:28px;height:28px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:50%;text-align:center;vertical-align:middle;font-size:10px;color:#F0B51E;font-weight:700;">1</td>
+          <td style="padding-left:14px;font-size:13px;color:#888888;line-height:1.5;">Our ${subject.toLowerCase()} team reviews your request</td>
+        </tr></table>
+      </td></tr>
+      <tr><td style="padding:8px 0;">
+        <table cellpadding="0" cellspacing="0"><tr>
+          <td style="width:28px;height:28px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:50%;text-align:center;vertical-align:middle;font-size:10px;color:#F0B51E;font-weight:700;">2</td>
+          <td style="padding-left:14px;font-size:13px;color:#888888;line-height:1.5;">We reach out within 24 to 48 hours</td>
+        </tr></table>
+      </td></tr>
+      <tr><td style="padding:8px 0;">
+        <table cellpadding="0" cellspacing="0"><tr>
+          <td style="width:28px;height:28px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:50%;text-align:center;vertical-align:middle;font-size:10px;color:#F0B51E;font-weight:700;">3</td>
+          <td style="padding-left:14px;font-size:13px;color:#888888;line-height:1.5;">We work out the details together</td>
+        </tr></table>
+      </td></tr>
+    </table>
 
-    <p style="font-size:10px;letter-spacing:3px;color:#555;text-transform:uppercase;margin:0 0 14px;text-align:center;">While you wait</p>
-    <div style="display:flex;gap:8px;margin-bottom:28px;">
-      <a href="https://goodnaturedsouls.com/artists" style="flex:1;border:1px solid #2a2a2a;padding:12px 8px;color:#F0B51E;text-decoration:none;font-size:10px;font-weight:700;letter-spacing:2px;text-align:center;">OUR ARTISTS</a>
-      <a href="https://goodnaturedsouls.com/shows" style="flex:1;border:1px solid #2a2a2a;padding:12px 8px;color:#F0B51E;text-decoration:none;font-size:10px;font-weight:700;letter-spacing:2px;text-align:center;">SHOWS</a>
-      <a href="https://goodnaturedsouls.com/store" style="flex:1;border:1px solid #2a2a2a;padding:12px 8px;color:#F0B51E;text-decoration:none;font-size:10px;font-weight:700;letter-spacing:2px;text-align:center;">STORE</a>
-    </div>
+    <!-- Divider -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #1e1e1e;font-size:0;">&nbsp;</td></tr></table>
 
-    <div style="text-align:center;">
-      <a href="https://goodnaturedsouls.com/fanclub" style="display:inline-block;background:#F0B51E;color:#000;padding:14px 36px;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:3px;border-radius:2px;">JOIN OUR MAILING LIST</a>
-    </div>
-  </div>
+    <!-- While you wait -->
+    <p style="font-size:9px;letter-spacing:3px;color:#555555;text-transform:uppercase;margin:0 0 14px;text-align:center;">While you wait</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr>
+      <td style="padding-right:4px;"><a href="https://goodnaturedsouls.com/artists" style="display:block;border:1px solid #2a2a2a;padding:12px 6px;color:#F0B51E;text-decoration:none;font-size:9px;font-weight:700;letter-spacing:2px;text-align:center;">ARTISTS</a></td>
+      <td style="padding:0 2px;"><a href="https://goodnaturedsouls.com/shows" style="display:block;border:1px solid #2a2a2a;padding:12px 6px;color:#F0B51E;text-decoration:none;font-size:9px;font-weight:700;letter-spacing:2px;text-align:center;">SHOWS</a></td>
+      <td style="padding-left:4px;"><a href="https://goodnaturedsouls.com/store" style="display:block;border:1px solid #2a2a2a;padding:12px 6px;color:#F0B51E;text-decoration:none;font-size:9px;font-weight:700;letter-spacing:2px;text-align:center;">STORE</a></td>
+    </tr></table>
 
-  <div style="border-top:1px solid #1e1e1e;padding:20px 32px;display:flex;justify-content:space-between;align-items:center;">
-    <span style="font-size:11px;color:#444;">Good Natured Souls Records · The Bronx, NYC</span>
-    <span style="font-size:11px;color:#444;">goodnaturedsouls.com</span>
-  </div>
+    <!-- CTA -->
+    <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+      <a href="https://goodnaturedsouls.com" style="display:inline-block;background:#F0B51E;color:#000000;padding:14px 40px;text-decoration:none;font-size:10px;font-weight:700;letter-spacing:3px;">JOIN THE MAILING LIST</a>
+    </td></tr></table>
 
-</div>
+  </td></tr>
+
+  <!-- Footer -->
+  <tr>
+    <td style="border-top:1px solid #1a1a1a;padding:16px 32px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:10px;color:#444444;">Good Natured Souls &middot; The Bronx, NYC</td>
+        <td align="right" style="font-size:10px;color:#444444;">goodnaturedsouls.com</td>
+      </tr></table>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
 </body>
 </html>`;
 }
@@ -227,19 +255,85 @@ export async function POST(req: NextRequest) {
 
     if (type === "welcome") {
       await resend.emails.send({
-        from: EMAILS.from,
+        from: EMAILS.newsletter,
         to: [data.email],
-        subject: "Welcome to Good Natured Souls",
-        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#161616;color:#fff;padding:32px;">
-          <h1 style="color:#F0B51E;letter-spacing:4px;">GOOD NATURED SOULS</h1>
-          <h2>Welcome, ${data.name}!</h2>
-          <p style="color:#888;">You are now part of the Good Natured Souls family.</p>
-          <a href="https://goodnaturedsouls.com/artists" style="display:block;border:1px solid #2a2a2a;padding:16px;color:#F0B51E;text-decoration:none;margin:8px 0;">ARTISTS — Explore our roster</a>
-          <a href="https://goodnaturedsouls.com/store" style="display:block;border:1px solid #2a2a2a;padding:16px;color:#F0B51E;text-decoration:none;margin:8px 0;">STORE — Shop new releases</a>
-          <a href="https://goodnaturedsouls.com/fanclub" style="display:block;border:1px solid #2a2a2a;padding:16px;color:#F0B51E;text-decoration:none;margin:8px 0;">FAN CLUB — Exclusive perks</a>
-          <hr style="border-color:#2a2a2a;margin:32px 0;"/>
-          <p style="color:#555;font-size:12px;">Good Natured Souls Records · New York City · goodnaturedsouls.com</p>
-        </div>`,
+        subject: `Welcome to Good Natured Souls, ${data.name}`,
+        html: `<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:32px 16px;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#111111;max-width:560px;width:100%;">
+
+  <!-- Gold header -->
+  <tr>
+    <td style="background:#F0B51E;padding:12px 32px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:11px;font-weight:700;letter-spacing:4px;color:#000000;">GOOD NATURED SOULS</td>
+        <td align="right" style="font-size:9px;letter-spacing:3px;color:#00000077;">EXIST ALTRUISTIC</td>
+      </tr></table>
+    </td>
+  </tr>
+
+  <!-- Body -->
+  <tr><td style="padding:40px 32px 32px;">
+    <p style="font-size:9px;letter-spacing:4px;color:#F0B51E;margin:0 0 10px;text-transform:uppercase;">Welcome</p>
+    <h1 style="font-size:24px;font-weight:700;color:#ffffff;margin:0 0 12px;">Welcome, ${data.name}.</h1>
+    <p style="font-size:14px;color:#666666;margin:0 0 28px;line-height:1.7;">You are now part of the Good Natured Souls family. We are a Hip-Hop and R&amp;B cooperative based in The Bronx, NYC — built on creativity, community, and the belief that music should exist for the culture.</p>
+
+    <!-- Divider -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #1e1e1e;font-size:0;">&nbsp;</td></tr></table>
+
+    <p style="font-size:9px;letter-spacing:3px;color:#555555;text-transform:uppercase;margin:0 0 14px;">Start Here</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+      <tr>
+        <td style="padding:8px 0;border-bottom:1px solid #1a1a1a;">
+          <a href="https://goodnaturedsouls.com/artists" style="font-size:12px;color:#F0B51E;text-decoration:none;font-weight:700;letter-spacing:1px;">ARTISTS</a>
+          <span style="font-size:12px;color:#444444;"> &mdash; Explore our roster</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;border-bottom:1px solid #1a1a1a;">
+          <a href="https://goodnaturedsouls.com/store" style="font-size:12px;color:#F0B51E;text-decoration:none;font-weight:700;letter-spacing:1px;">STORE</a>
+          <span style="font-size:12px;color:#444444;"> &mdash; Shop new releases and merch</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;border-bottom:1px solid #1a1a1a;">
+          <a href="https://goodnaturedsouls.com/shows" style="font-size:12px;color:#F0B51E;text-decoration:none;font-weight:700;letter-spacing:1px;">SHOWS</a>
+          <span style="font-size:12px;color:#444444;"> &mdash; See upcoming performances</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;">
+          <a href="https://goodnaturedsouls.com/about" style="font-size:12px;color:#F0B51E;text-decoration:none;font-weight:700;letter-spacing:1px;">ABOUT</a>
+          <span style="font-size:12px;color:#444444;"> &mdash; Our story and mission</span>
+        </td>
+      </tr>
+    </table>
+
+    <!-- CTA -->
+    <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+      <a href="https://goodnaturedsouls.com" style="display:inline-block;background:#F0B51E;color:#000000;padding:14px 40px;text-decoration:none;font-size:10px;font-weight:700;letter-spacing:3px;">VISIT GOODNATUREDSOULS.COM</a>
+    </td></tr></table>
+
+  </td></tr>
+
+  <!-- Footer -->
+  <tr>
+    <td style="border-top:1px solid #1a1a1a;padding:16px 32px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:10px;color:#444444;">Good Natured Souls &middot; The Bronx, NYC</td>
+        <td align="right" style="font-size:10px;color:#333333;"><a href="https://goodnaturedsouls.com/privacy" style="color:#333333;text-decoration:none;">Unsubscribe</a></td>
+      </tr></table>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`,
       });
       return NextResponse.json({ success: true });
     }
@@ -249,14 +343,82 @@ export async function POST(req: NextRequest) {
         from: EMAILS.newsletter,
         to: [data.email],
         subject: "You are on the list — Good Natured Souls",
-        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#161616;color:#fff;padding:32px;">
-          <h1 style="color:#F0B51E;letter-spacing:4px;">GOOD NATURED SOULS</h1>
-          <h2>You are on the list.</h2>
-          <p style="color:#888;">You will be the first to know about new releases, upcoming shows, and exclusive offers.</p>
-          <a href="https://goodnaturedsouls.com" style="display:inline-block;background:#F0B51E;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;margin-top:16px;">VISIT GNS</a>
-          <hr style="border-color:#2a2a2a;margin:32px 0;"/>
-          <p style="color:#555;font-size:12px;">You can unsubscribe at any time. Good Natured Souls Records · New York City</p>
-        </div>`,
+        html: `<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:32px 16px;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#111111;max-width:560px;width:100%;">
+
+  <!-- Gold header -->
+  <tr>
+    <td style="background:#F0B51E;padding:12px 32px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:11px;font-weight:700;letter-spacing:4px;color:#000000;">GOOD NATURED SOULS</td>
+        <td align="right" style="font-size:9px;letter-spacing:3px;color:#00000077;">EXIST ALTRUISTIC</td>
+      </tr></table>
+    </td>
+  </tr>
+
+  <!-- Body -->
+  <tr><td style="padding:40px 32px 32px;">
+    <p style="font-size:9px;letter-spacing:4px;color:#F0B51E;margin:0 0 10px;text-transform:uppercase;">Welcome to the List</p>
+    <h1 style="font-size:24px;font-weight:700;color:#ffffff;margin:0 0 12px;">You are on the list.</h1>
+    <p style="font-size:14px;color:#666666;margin:0 0 28px;line-height:1.7;">You will be the first to know about new releases, upcoming shows, exclusive drops, and everything Good Natured Souls.</p>
+
+    <!-- Divider -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #1e1e1e;font-size:0;">&nbsp;</td></tr></table>
+
+    <p style="font-size:9px;letter-spacing:3px;color:#555555;text-transform:uppercase;margin:0 0 14px;">Explore</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+      <tr>
+        <td style="padding:8px 0;border-bottom:1px solid #1a1a1a;">
+          <a href="https://goodnaturedsouls.com/artists" style="font-size:12px;color:#F0B51E;text-decoration:none;font-weight:700;letter-spacing:1px;">ARTISTS</a>
+          <span style="font-size:12px;color:#444444;"> &mdash; Meet the roster</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;border-bottom:1px solid #1a1a1a;">
+          <a href="https://goodnaturedsouls.com/shows" style="font-size:12px;color:#F0B51E;text-decoration:none;font-weight:700;letter-spacing:1px;">SHOWS</a>
+          <span style="font-size:12px;color:#444444;"> &mdash; Upcoming performances</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;border-bottom:1px solid #1a1a1a;">
+          <a href="https://goodnaturedsouls.com/store" style="font-size:12px;color:#F0B51E;text-decoration:none;font-weight:700;letter-spacing:1px;">STORE</a>
+          <span style="font-size:12px;color:#444444;"> &mdash; New releases and merch</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;">
+          <a href="https://goodnaturedsouls.com/about" style="font-size:12px;color:#F0B51E;text-decoration:none;font-weight:700;letter-spacing:1px;">ABOUT</a>
+          <span style="font-size:12px;color:#444444;"> &mdash; Our story</span>
+        </td>
+      </tr>
+    </table>
+
+    <!-- CTA -->
+    <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+      <a href="https://goodnaturedsouls.com" style="display:inline-block;background:#F0B51E;color:#000000;padding:14px 40px;text-decoration:none;font-size:10px;font-weight:700;letter-spacing:3px;">VISIT GOODNATUREDSOULS.COM</a>
+    </td></tr></table>
+
+  </td></tr>
+
+  <!-- Footer -->
+  <tr>
+    <td style="border-top:1px solid #1a1a1a;padding:16px 32px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:10px;color:#444444;">Good Natured Souls &middot; The Bronx, NYC</td>
+        <td align="right" style="font-size:10px;color:#333333;"><a href="https://goodnaturedsouls.com/privacy" style="color:#333333;text-decoration:none;">Unsubscribe</a></td>
+      </tr></table>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`,
       });
       return NextResponse.json({ success: true });
     }
