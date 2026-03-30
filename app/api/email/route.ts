@@ -1,8 +1,92 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { neon } from "@neondatabase/serverless";
+import crypto from "crypto";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+
+const ALGORITHM = 'aes-256-gcm';
+const SECRET = process.env.ENCRYPTION_SECRET || process.env.NEXTAUTH_SECRET || 'gns-default-secret-32-chars-long!!';
+const KEY = crypto.scryptSync(SECRET, 'gns-salt', 32);
+
+function encrypt(text: string): string {
+  if (!text) return '';
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(ALGORITHM, KEY, iv);
+  const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return `${iv.toString('hex')}:${tag.toString('hex')}:${encrypted.toString('hex')}`;
+}
+
+function hashEmail(email: string): string {
+  return crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+}
+
+async function saveInquiryToNeon(data: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  source?: string;
+  inquiry_type?: string;
+  priority?: string;
+  artist_slug?: string;
+  referrer?: string;
+  consent_given?: boolean;
+}) {
+  try {
+    const sql = neon(process.env.POSTGRES_URL!);
+    const emailHash = hashEmail(data.email);
+    const nameEnc = encrypt(data.name);
+    const emailEnc = encrypt(data.email);
+    const messageEnc = encrypt(data.message);
+
+    const source = data.source || 'contact-form';
+    const inquiryType = data.inquiry_type || (
+      data.subject === 'Booking' ? 'booking' :
+      data.subject === 'Press & Media' ? 'press' :
+      data.subject === 'Licensing' ? 'licensing' :
+      data.subject === 'Fan Club' ? 'fan' :
+      data.subject === 'Partnership' ? 'business' :
+      data.subject === 'Technical Support' ? 'support' : 'other'
+    );
+    const priority = data.priority || (
+      data.subject === 'Booking' ? 'high' :
+      data.subject === 'Press & Media' ? 'high' : 'normal'
+    );
+
+    // Upsert contact first so trigger can link inquiry
+    await sql`
+      INSERT INTO contacts (email_enc, email_hash, name_enc, inquiry_count, subjects, sources, inquiry_types, data_source, first_seen_at, last_seen_at)
+      VALUES (${emailEnc}, ${emailHash}, ${nameEnc}, 1, ARRAY[${data.subject}], ARRAY[${source}], ARRAY[${inquiryType}], ${source}, NOW(), NOW())
+      ON CONFLICT (email_hash) DO UPDATE SET
+        name_enc      = EXCLUDED.name_enc,
+        inquiry_count = contacts.inquiry_count + 1,
+        subjects      = CASE WHEN ${data.subject} = ANY(contacts.subjects) THEN contacts.subjects ELSE contacts.subjects || ARRAY[${data.subject}] END,
+        sources       = CASE WHEN ${source} = ANY(contacts.sources) THEN contacts.sources ELSE contacts.sources || ARRAY[${source}] END,
+        inquiry_types = CASE WHEN ${inquiryType} = ANY(contacts.inquiry_types) THEN contacts.inquiry_types ELSE contacts.inquiry_types || ARRAY[${inquiryType}] END,
+        last_seen_at  = NOW(),
+        updated_at    = NOW()
+    `;
+
+    // Insert inquiry — trigger auto-links contact_id via email_hash
+    await sql`
+      INSERT INTO inquiries (
+        name_enc, email_enc, email_hash, message_enc,
+        subject, status, source, inquiry_type, priority,
+        artist_slug, referrer, consent_given, consent_captured_at, consent_version
+      ) VALUES (
+        ${nameEnc}, ${emailEnc}, ${emailHash}, ${messageEnc},
+        ${data.subject}, 'new', ${source}, ${inquiryType}, ${priority},
+        ${data.artist_slug || null}, ${data.referrer || null},
+        ${data.consent_given || false}, NOW(), '1.0'
+      )
+    `;
+  } catch (err) {
+    console.error('Failed to save inquiry to Neon:', err);
+  }
+}
 
 const EMAILS = {
   general: 'info@goodnaturedsouls.com',
@@ -114,7 +198,7 @@ export async function POST(req: NextRequest) {
         data.subject === 'Technical Support' ? EMAILS.support :
         EMAILS.general;
 
-      await saveInquiryToStrapi(data);
+      await saveInquiryToNeon(data);
 
       await resend.emails.send({
         from: EMAILS.from,
