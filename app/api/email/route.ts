@@ -280,6 +280,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    if (type === "crm-reply") {
+      await resend.emails.send({
+        from: EMAILS.from,
+        to: [data.to],
+        replyTo: EMAILS.general,
+        subject: `Re: ${data.subject}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#161616;color:#fff;padding:32px;">
+          <h1 style="color:#F0B51E;letter-spacing:4px;font-size:16px;">GOOD NATURED SOULS</h1>
+          <p style="color:#ccc;font-size:14px;line-height:1.8;white-space:pre-wrap;">${data.message}</p>
+          <hr style="border-color:#2a2a2a;margin:32px 0;"/>
+          <p style="color:#555;font-size:12px;">Good Natured Souls Records · The Bronx, NYC · goodnaturedsouls.com</p>
+        </div>`,
+      });
+      return NextResponse.json({ success: true });
+    }
+
     return NextResponse.json({ error: "Unknown type" }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
