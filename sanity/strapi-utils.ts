@@ -32,13 +32,18 @@ export async function getArtistWithProjects(slug: string) {
     'socialMediaLinks',
     'projects.cover',
     'musicVideos.thumbnail',
+    'epk',
     'epk.pressPhotos',
     'HighlightArticles.coverImage',
   ].join(',');
 
+  const strapiToken = process.env.STRAPI_API_TOKEN;
   const res = await fetch(
     `${STRAPI_URL}/api/artists?filters[slug][$eq]=${slug}&populate=${populate}`,
-    { cache: 'no-store' }
+    {
+      cache: 'no-store',
+      headers: strapiToken ? { Authorization: `Bearer ${strapiToken}` } : {},
+    }
   );
   if (!res.ok) return { artist: null, projects: [] };
   const json = await res.json().catch(() => ({ data: [] }));
