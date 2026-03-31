@@ -216,6 +216,10 @@ function confirmationEmailHtml(name: string, subject: string, message: string): 
 export async function POST(req: NextRequest) {
   try {
     const { type, data } = await req.json();
+    // Honeypot — bots fill the website field, humans don't
+    if (data?.website) {
+      return NextResponse.json({ success: true });
+    }
 
     if (type === "contact") {
       const toEmail =

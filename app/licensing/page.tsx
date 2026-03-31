@@ -9,8 +9,10 @@ export default function LicensingPage() {
   const [submitted, setSubmitted] = useState(false);
   const useCases = ["Film & TV", "Advertising", "Video Game", "Podcast", "YouTube / Content Creation", "Live Performance", "Streaming", "Other"];
 
+  const [honeypot, setHoneypot] = React.useState("");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot) return;
     setStatus("loading");
     try {
       await fetch("/api/email", {
@@ -76,6 +78,7 @@ export default function LicensingPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <input type="text" name="website" value={honeypot} onChange={e => setHoneypot(e.target.value)} style={{ display: "none" }} tabIndex={-1} autoComplete="off" />
                   <h2 className="font-oswald text-xl font-bold tracking-widest">REQUEST A LICENSE</h2>
                   <div className="grid grid-cols-2 gap-4">
                     <div>

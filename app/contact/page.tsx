@@ -32,8 +32,10 @@ function ContactForm() {
     }
   }, [searchParams]);
 
+  const [honeypot, setHoneypot] = React.useState("");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot) return; // bot detected
     setStatus("loading");
     try {
       await fetch("/api/email", {
@@ -100,6 +102,8 @@ function ContactForm() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Honeypot — hidden from humans, bots fill this */}
+          <input type="text" name="website" value={honeypot} onChange={e => setHoneypot(e.target.value)} style={{ display: 'none' }} tabIndex={-1} autoComplete="off" />
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="font-oswald text-xs tracking-widest text-gray-500 uppercase block mb-2">Name</label>
