@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, getIP } from "@/lib/rateLimit";
 import { Resend } from "resend";
 import { neon } from "@neondatabase/serverless";
 import crypto from "crypto";
@@ -215,6 +216,11 @@ function confirmationEmailHtml(name: string, subject: string, message: string): 
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getIP(req);
+    const rl = rateLimit(ip, 'email', 3, 60_000); // 3 per minute per IP
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     const { type, data } = await req.json();
     // Honeypot — bots fill the website field, humans don't
     if (data?.website) {

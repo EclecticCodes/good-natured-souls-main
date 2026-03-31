@@ -1,3 +1,4 @@
+import { rateLimit, getIP } from "@/lib/rateLimit";
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import crypto from "crypto";
@@ -39,6 +40,11 @@ async function syncToResend(email: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getIP(req);
+    const rl = rateLimit(ip, 'mailinglist', 3, 300_000); // 3 per 5 min per IP
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     const { email, source = "newsletter", consentGiven = false, consentTimestamp } = await req.json();
 
     if (!email || !email.includes("@")) {
