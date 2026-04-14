@@ -317,6 +317,7 @@ export async function getGroupWithMembers(slug: string) {
     'members',
     'members.artist',
     'members.artist.profileImage',
+    'members.photo',
     'musicVideos',
   ].join(',');
   const res = await fetch(
@@ -360,6 +361,7 @@ export async function getGroupWithMembers(slug: string) {
       role: m.role || '',
       instrument: m.instrument || '',
       sortOrder: m.sortOrder || 0,
+      photo: m.photo?.data?.attributes?.url ? resolveUrl(m.photo.data.attributes.url) : null,
       artist: m.artist?.data ? {
         name: m.artist.data.attributes.name,
         slug: m.artist.data.attributes.slug,

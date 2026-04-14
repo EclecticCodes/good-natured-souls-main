@@ -86,17 +86,17 @@ const GroupPage = async ({ params }: Props) => {
                 {group.members.map((member: any, i: number) => (
                   <div key={i} className="border border-secondaryInteraction hover:border-accent transition-colors group">
                     {/* Profile image if roster artist */}
-                    {member.artist?.profileImage && (
+                    {(member.artist?.profileImage || member.photo) && (
                       <div className="aspect-square overflow-hidden bg-secondaryInteraction">
                         <img
-                          src={member.artist.profileImage}
+                          src={member.artist?.profileImage || member.photo}
                           alt={member.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
                     )}
                     {/* No image fallback */}
-                    {!member.artist?.profileImage && (
+                    {!member.artist?.profileImage && !member.photo && (
                       <div className="aspect-square bg-secondaryInteraction flex items-center justify-center">
                         <span className="font-oswald text-4xl text-gray-700">
                           {member.name.charAt(0).toUpperCase()}
