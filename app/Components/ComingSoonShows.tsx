@@ -13,6 +13,8 @@ type Show = {
   price: number;
   ticketUrl?: string;
   ticketPlatform: 'stripe' | 'ticketmaster' | 'eventbrite' | 'dice' | 'posh' | 'other';
+  showOwner?: 'gns' | 'third_party';
+  onSaleAt?: string | null;
   source: 'strapi';
   soldOut?: boolean;
   flyer?: string;
@@ -55,23 +57,29 @@ const ShowsComponent = () => {
         const res = await fetch(`${strapiUrl}/api/shows?sort=date:asc&populate=flyer&publicationState=live`);
         if (res.ok) {
           const json = await res.json();
-          const strapiShows = (json.data || []).map((item: any) => ({
-            id: `strapi-${item.id}`,
-            title: item.attributes.title,
-            artist: item.attributes.artist,
-            date: item.attributes.date,
-            venue: item.attributes.venue,
-            city: item.attributes.city,
-            price: item.attributes.price || 0,
-            ticketUrl: item.attributes.ticketUrl || null,
-            ticketPlatform: item.attributes.ticketPlatform || 'stripe',
-            soldOut: item.attributes.soldOut || false,
-            venueAddress: item.attributes.venueAddress || null,
-            flyer: item.attributes.flyer?.data?.attributes?.url
-              ? resolveUrl(item.attributes.flyer.data.attributes.url, strapiUrl)
-              : null,
-            source: 'strapi' as const,
-          }));
+          const now = new Date();
+          const strapiShows = (json.data || [])
+            .map((item: any) => ({
+              id: `strapi-${item.id}`,
+              title: item.attributes.title,
+              artist: item.attributes.artist,
+              date: item.attributes.date,
+              venue: item.attributes.venue,
+              city: item.attributes.city,
+              price: item.attributes.price || 0,
+              ticketUrl: item.attributes.ticketUrl || null,
+              ticketPlatform: item.attributes.ticketPlatform || 'stripe',
+              showOwner: item.attributes.showOwner || 'gns',
+              onSaleAt: item.attributes.onSaleAt || null,
+              soldOut: item.attributes.soldOut || false,
+              venueAddress: item.attributes.venueAddress || null,
+              flyer: item.attributes.flyer?.data?.attributes?.url
+                ? resolveUrl(item.attributes.flyer.data.attributes.url, strapiUrl)
+                : null,
+              source: 'strapi' as const,
+            }))
+            // Filter out past shows
+            .filter((s: any) => new Date(s.date) >= now);
           setShows(strapiShows);
         }
       } catch {}
@@ -82,17 +90,22 @@ const ShowsComponent = () => {
 
   const handleBuyTicket = (show: Show) => {
     if (show.soldOut) return;
-    if (show.ticketPlatform !== 'stripe' && show.ticketUrl) {
-      window.open(show.ticketUrl, '_blank');
-    } else {
-      addItem({
-        id: show.id,
-        name: `${show.title} — ${show.venue}`,
-        price: show.price,
-        quantity: 1,
-        type: 'ticket',
-      });
+    if (new Date(show.date) < new Date()) return;
+    if (show.onSaleAt && new Date(show.onSaleAt) > new Date()) return;
+    // Third party — route external
+    if ((show as any).showOwner === 'third_party' || show.ticketPlatform !== 'stripe') {
+      if (show.ticketUrl) window.open(show.ticketUrl, '_blank');
+      return;
     }
+    // GNS internal — block free tickets
+    if (show.price === 0) return;
+    addItem({
+      id: show.id,
+      name: `${show.title} — ${show.venue}[ticket]`,
+      price: show.price,
+      quantity: 1,
+      type: 'ticket',
+    });
   };
 
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -191,8 +204,15 @@ const ShowsComponent = () => {
                     <p className='font-oswald text-xl font-bold text-accent'>
                       {show.soldOut ? 'SOLD OUT' : show.price === 0 ? 'FREE' : `$${show.price.toFixed(2)}`}
                     </p>
-                    {!show.soldOut && (
-                      inCart ? (
+                    {(() => {
+                      const now = new Date();
+                      const isPast = new Date(show.date) < now;
+                      const onSaleAt = (show as any).onSaleAt ? new Date((show as any).onSaleAt) : null;
+                      const notOnSale = onSaleAt && onSaleAt > now;
+                      if (isPast) return <span className='font-oswald text-xs text-gray-600 tracking-widest'>PAST EVENT</span>;
+                      if (show.soldOut) return <span className='font-oswald text-xs text-gray-500 tracking-widest'>SOLD OUT</span>;
+                      if (notOnSale) return <span className='font-oswald text-xs text-accent tracking-widest'>ON SALE SOON</span>;
+                      return inCart ? (
                         <a href='/checkout' className='bg-secondaryInteraction text-accent border border-accent font-oswald text-xs font-bold px-4 py-2 tracking-widest hover:bg-accent hover:text-primary transition-colors text-center w-full'>
                           VIEW CART
                         </a>
@@ -204,8 +224,8 @@ const ShowsComponent = () => {
                         >
                           {label.toUpperCase()} {isExternal ? '↗' : ''}
                         </button>
-                      )
-                    )}
+                      );
+                    })()}
                     <a href={`/shows/${show.id.replace('strapi-', '')}`} className='text-xs text-gray-600 hover:text-accent transition-colors tracking-wider text-center w-full'>
                       VIEW DETAILS
                     </a>
