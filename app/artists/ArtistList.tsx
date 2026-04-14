@@ -8,14 +8,26 @@ import { resolveUrl } from '@/lib/resolveUrl';
 
 type Artist = {
   _id: string;
-  _createdAt: string;
   name: string;
   slug: string;
   signature: string;
   profileImage: string;
   backgroundImage?: string;
-  artistType: "roster" | "affiliate" | "spotlight";
+  artistType: string;
+  designation?: string[];
 };
+
+type Group = {
+  _id: string;
+  name: string;
+  slug: string;
+  signature: string;
+  profileImage: string;
+  backgroundImage?: string;
+  groupType: string;
+};
+
+type Tab = "roster" | "affiliate" | "groups" | "producers" | "instrumentalists" | "djs";
 
 const useMediaQuery = (query: string) => {
   const [matches, setMatches] = useState(false);
@@ -32,20 +44,24 @@ const useMediaQuery = (query: string) => {
 const ArtistList = () => {
   const isMediumScreen = useMediaQuery("(max-width: 768px)");
   const [allArtists, setAllArtists] = useState<Artist[]>([]);
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [allGroups, setAllGroups] = useState<Group[]>([]);
+  const [selectedItem, setSelectedItem] = useState<Artist | Group | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"prev" | "next">("next");
-  const [activeSection, setActiveSection] = useState<"roster" | "affiliate">("roster");
+  const [activeTab, setActiveTab] = useState<Tab>("roster");
+  const [hasMounted, setHasMounted] = useState(false);
+
+  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+
+  useEffect(() => { setHasMounted(true); }, []);
 
   useEffect(() => {
-    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-
-    fetch(`${strapiUrl}/api/artists?populate=profileImage,backgroundImage&sort=orderRank:asc`)
-      .then((r) => r.json())
-      .then((json) => {
+    // Fetch artists
+    fetch(`${strapiUrl}/api/artists?populate=profileImage,backgroundImage,designation&sort=orderRank:asc`)
+      .then(r => r.json())
+      .then(json => {
         const mapped = (json.data || []).map((item: any) => ({
           _id: String(item.id),
-          _createdAt: item.attributes.createdAt || "",
           name: item.attributes.name,
           slug: item.attributes.slug,
           signature: item.attributes.signature || item.attributes.name,
@@ -54,47 +70,103 @@ const ArtistList = () => {
           backgroundImage: item.attributes.backgroundImage?.data?.attributes?.url
             ? resolveUrl(item.attributes.backgroundImage.data.attributes.url, strapiUrl) : undefined,
           artistType: item.attributes.artistType || "roster",
+          designation: (item.attributes.designation || []).map((d: any) => d.designation),
         }));
         setAllArtists(mapped);
         const first = mapped.find((a: Artist) => a.artistType === "roster") || mapped[0];
-        if (first) { setSelectedArtist(first); setCurrentIndex(mapped.indexOf(first)); }
+        if (first) { setSelectedItem(first); setCurrentIndex(0); }
+      })
+      .catch(() => {});
+
+    // Fetch groups
+    fetch(`${strapiUrl}/api/groups?populate=profileImage,backgroundImage&sort=orderRank:asc`)
+      .then(r => r.json())
+      .then(json => {
+        const mapped = (json.data || []).map((item: any) => ({
+          _id: String(item.id),
+          name: item.attributes.name,
+          slug: item.attributes.slug,
+          signature: item.attributes.signature || item.attributes.name,
+          profileImage: item.attributes.profileImage?.data?.attributes?.url
+            ? resolveUrl(item.attributes.profileImage.data.attributes.url, strapiUrl) : "",
+          backgroundImage: item.attributes.backgroundImage?.data?.attributes?.url
+            ? resolveUrl(item.attributes.backgroundImage.data.attributes.url, strapiUrl) : undefined,
+          groupType: item.attributes.groupType || "band",
+        }));
+        setAllGroups(mapped);
       })
       .catch(() => {});
   }, []);
 
-  const roster = allArtists.filter((a) => a.artistType === "roster" || a.artistType === "spotlight");
-  const affiliates = allArtists.filter((a) => a.artistType === "affiliate");
-  const activeArtists = activeSection === "roster" ? roster : affiliates;
+  const roster         = allArtists.filter(a => a.artistType === "roster" || a.artistType === "spotlight");
+  const affiliates     = allArtists.filter(a => a.artistType === "affiliate");
+  const producers      = allArtists.filter(a => a.designation?.some(d => ["producer","beatmaker","mixing_engineer"].includes(d)));
+  const instrumentalists = allArtists.filter(a => a.designation?.some(d => d === "instrumentalist"));
+  const djs            = allArtists.filter(a => a.designation?.some(d => d === "dj"));
 
-  const handleNextClick = () => {
+  const getActiveItems = (): (Artist | Group)[] => {
+    switch (activeTab) {
+      case "roster":          return roster;
+      case "affiliate":       return affiliates;
+      case "groups":          return allGroups;
+      case "producers":       return producers;
+      case "instrumentalists": return instrumentalists;
+      case "djs":             return djs;
+      default:                return roster;
+    }
+  };
+
+  const getItemHref = (item: Artist | Group): string => {
+    if ('groupType' in item) return `/groups/${item.slug}`;
+    return `/artists/${item.slug}`;
+  };
+
+  const activeItems = getActiveItems();
+
+  const tabs: { key: Tab; label: string; count: number }[] = [
+    { key: "roster",          label: "Official Roster",   count: roster.length },
+    { key: "affiliate",       label: "Affiliates",        count: affiliates.length },
+    ...(allGroups.length > 0          ? [{ key: "groups" as Tab,          label: "Groups & Collectives", count: allGroups.length }] : []),
+    ...(producers.length > 0          ? [{ key: "producers" as Tab,        label: "Producers",            count: producers.length }] : []),
+    ...(instrumentalists.length > 0   ? [{ key: "instrumentalists" as Tab, label: "Instrumentalists",     count: instrumentalists.length }] : []),
+    ...(djs.length > 0                ? [{ key: "djs" as Tab,              label: "DJs",                  count: djs.length }] : []),
+  ];
+
+  const TAB_DESCRIPTIONS: Record<Tab, string> = {
+    roster:           "GOOD NATURED SOULS VERY OWN",
+    affiliate:        "CREATIVE COLLABORATORS",
+    groups:           "BANDS, COLLECTIVES & LIVE ACTS",
+    producers:        "ARCHITECTS OF THE SOUND",
+    instrumentalists: "THE LIVE ELEMENT",
+    djs:              "SELECTORS & SONIC CURATORS",
+  };
+
+  const handleNext = () => {
     setDirection("next");
-    const newIndex = (currentIndex + 1) % activeArtists.length;
+    const newIndex = (currentIndex + 1) % activeItems.length;
     setCurrentIndex(newIndex);
-    setSelectedArtist(activeArtists[newIndex]);
+    setSelectedItem(activeItems[newIndex]);
   };
 
-  const handlePrevClick = () => {
+  const handlePrev = () => {
     setDirection("prev");
-    const newIndex = currentIndex === 0 ? activeArtists.length - 1 : currentIndex - 1;
+    const newIndex = currentIndex === 0 ? activeItems.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
-    setSelectedArtist(activeArtists[newIndex]);
+    setSelectedItem(activeItems[newIndex]);
   };
 
-  const handleHover = (artist: Artist, index: number) => {
-    if (!isMediumScreen) { setSelectedArtist(artist); setCurrentIndex(index); }
+  const handleHover = (item: Artist | Group, index: number) => {
+    if (!isMediumScreen) { setSelectedItem(item); setCurrentIndex(index); }
   };
 
-  const handleSectionSwitch = (section: "roster" | "affiliate") => {
-    setActiveSection(section);
+  const handleTabSwitch = (tab: Tab) => {
+    setActiveTab(tab);
     setCurrentIndex(0);
-    const sectionArtists = section === "roster" ? roster : affiliates;
-    if (sectionArtists.length > 0) setSelectedArtist(sectionArtists[0]);
+    const items = getActiveItems();
+    if (items.length > 0) setSelectedItem(items[0]);
   };
 
-  const [hasMounted, setHasMounted] = React.useState(false);
-  React.useEffect(() => { setHasMounted(true); }, []);
-
-  if (!hasMounted || allArtists.length === 0) return (
+  if (!hasMounted) return (
     <div className="py-8 max-w-5xl mx-auto px-4">
       <div className="flex md:flex-row flex-col-reverse items-center justify-center gap-8">
         <div className="flex flex-col gap-4 w-full md:w-1/2">
@@ -109,56 +181,46 @@ const ArtistList = () => {
 
   return (
     <div className="py-8">
-      {/* Section tabs — only show if affiliates exist */}
-      {affiliates.length > 0 && (
-        <div className="flex items-center gap-0 border-b border-secondaryInteraction mb-12 max-w-5xl mx-auto px-4">
-          {[
-            { key: "roster" as const, label: "Official Roster", count: roster.length },
-            { key: "affiliate" as const, label: "Affiliates", count: affiliates.length },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => handleSectionSwitch(tab.key)}
-              className={`font-oswald text-xs tracking-widest px-6 py-3 border-b-2 transition-all duration-200 ${
-                activeSection === tab.key
-                  ? "border-accent text-accent"
-                  : "border-transparent text-gray-500 hover:text-white"
-              }`}
-            >
-              {tab.label.toUpperCase()}
-              <span className="ml-2 text-xs opacity-50">({tab.count})</span>
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Tabs */}
+      <div className="flex items-center gap-0 border-b border-secondaryInteraction mb-12 max-w-5xl mx-auto px-4 overflow-x-auto">
+        {tabs.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => handleTabSwitch(tab.key)}
+            className={`font-oswald text-xs tracking-widest px-5 py-3 border-b-2 transition-all duration-200 whitespace-nowrap ${
+              activeTab === tab.key
+                ? "border-accent text-accent"
+                : "border-transparent text-gray-500 hover:text-white"
+            }`}
+          >
+            {tab.label.toUpperCase()}
+            <span className="ml-2 text-xs opacity-50">({tab.count})</span>
+          </button>
+        ))}
+      </div>
 
       {/* Section description */}
       <div className="max-w-5xl mx-auto px-4 mb-8">
-        {activeSection === "roster" && (
-          <p className="text-gray-600 text-sm font-oswald tracking-widest">GOOD NATURED SOULS VERY OWN</p>
-        )}
-        {activeSection === "affiliate" && (
-          <p className="text-gray-600 text-sm font-oswald tracking-widest">CREATIVE COLLABORATORS</p>
-        )}
+        <p className="text-gray-600 text-sm font-oswald tracking-widest">{TAB_DESCRIPTIONS[activeTab]}</p>
       </div>
 
-      {/* Artist display */}
-      {activeArtists.length > 0 ? (
+      {/* Display */}
+      {activeItems.length > 0 ? (
         <section className="flex md:text-left text-center items-center justify-center md:flex-row flex-col-reverse md:gap-0 gap-4 px-4">
           <section className="flex justify-center items-center w-full md:w-1/2">
             <section className="inline-flex flex-col gap-4">
-              {activeArtists.map((artist, index) => (
+              {activeItems.map((item, index) => (
                 <motion.a
-                  href={`/artists/${artist.slug}`}
+                  href={getItemHref(item)}
                   className={`font-oswald md:text-5xl text-4xl transition-colors duration-300 font-bold ${
                     currentIndex === index ? "text-accent" : ""
                   } hover:text-accent hover:cursor-pointer hover:underline-offset-4 decoration-4 decoration-orange-400`}
-                  key={artist._id}
-                  onMouseOver={() => handleHover(artist, index)}
+                  key={item._id}
+                  onMouseOver={() => handleHover(item, index)}
                   whileHover={{ scale: 1.05, x: 6 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {artist.name}
+                  {item.name}
                 </motion.a>
               ))}
             </section>
@@ -168,26 +230,26 @@ const ArtistList = () => {
             {!isMediumScreen ? (
               <AnimatePresence mode="popLayout">
                 <motion.div
-                  key={selectedArtist?._id}
+                  key={selectedItem?._id}
                   initial={{ opacity: 0, filter: "blur(8px)", scale: 0.97 }}
                   animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
                   exit={{ opacity: 0, filter: "blur(8px)", scale: 0.97 }}
                   transition={{ duration: 0.4 }}
                 >
                   <Polaroid
-                    profileImage={selectedArtist ? selectedArtist.profileImage : activeArtists[0].profileImage}
-                    signature={selectedArtist ? selectedArtist.signature || selectedArtist.name : activeArtists[0].name}
+                    profileImage={selectedItem ? selectedItem.profileImage : activeItems[0].profileImage}
+                    signature={selectedItem ? selectedItem.signature || selectedItem.name : activeItems[0].name}
                   />
                 </motion.div>
               </AnimatePresence>
             ) : (
               <ArtistCarouselMobile
-                selectedArtist={selectedArtist || activeArtists[0]}
+                selectedArtist={selectedItem ? { ...selectedItem, _createdAt: "", slug: (selectedItem as any).slug } as any : { ...activeItems[0], _createdAt: "", slug: (activeItems[0] as any).slug } as any}
                 currentIndex={currentIndex}
-                numArtists={activeArtists.length}
+                numArtists={activeItems.length}
                 direction={direction}
-                handleNextClick={handleNextClick}
-                handlePrevClick={handlePrevClick}
+                handleNextClick={handleNext}
+                handlePrevClick={handlePrev}
               />
             )}
           </div>

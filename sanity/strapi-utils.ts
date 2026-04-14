@@ -286,3 +286,113 @@ export async function getProducts() {
     return [];
   }
 }
+
+export async function getGroups() {
+  const res = await fetch(
+    `${STRAPI_URL}/api/groups?populate=profileImage,backgroundImage,socialMediaLinks&sort=orderRank:asc`,
+    { cache: 'no-store' }
+  );
+  if (!res.ok) return [];
+  const json = await res.json().catch(() => ({ data: [] }));
+  return (json.data || []).map((item: any) => ({
+    _id: String(item.id),
+    name: item.attributes.name,
+    slug: item.attributes.slug,
+    signature: item.attributes.signature || item.attributes.name,
+    groupType: item.attributes.groupType || 'band',
+    status: item.attributes.status || 'active',
+    isCoreRoster: item.attributes.isCoreRoster || false,
+    isAffiliate: item.attributes.isAffiliate || false,
+    profileImage: resolveUrl(item.attributes.profileImage?.data?.attributes?.url),
+    backgroundImage: item.attributes.backgroundImage?.data?.attributes?.url
+      ? resolveUrl(item.attributes.backgroundImage.data.attributes.url) : undefined,
+  }));
+}
+
+export async function getGroupWithMembers(slug: string) {
+  const populate = [
+    'profileImage',
+    'backgroundImage',
+    'socialMediaLinks',
+    'members',
+    'members.artist',
+    'members.artist.profileImage',
+    'musicVideos',
+  ].join(',');
+  const res = await fetch(
+    `${STRAPI_URL}/api/groups?filters[slug][$eq]=${slug}&populate=${populate}`,
+    { cache: 'no-store' }
+  );
+  if (!res.ok) return null;
+  const json = await res.json().catch(() => ({ data: [] }));
+  const item = json.data?.[0];
+  if (!item) return null;
+  const attrs = item.attributes;
+  const aboutText = (() => {
+    if (!attrs.about) return undefined;
+    if (typeof attrs.about === 'string') return attrs.about;
+    if (Array.isArray(attrs.about)) {
+      return attrs.about.map((block: any) => {
+        if (block.children) return block.children.map((c: any) => c.text || '').join('');
+        return '';
+      }).filter(Boolean).join('\n\n');
+    }
+    return undefined;
+  })();
+  return {
+    _id: String(item.id),
+    name: attrs.name,
+    slug: attrs.slug,
+    signature: attrs.signature || attrs.name,
+    groupType: attrs.groupType || 'band',
+    status: attrs.status || 'active',
+    isCoreRoster: attrs.isCoreRoster || false,
+    isAffiliate: attrs.isAffiliate || false,
+    foundedYear: attrs.foundedYear || null,
+    basedIn: attrs.basedIn || null,
+    about: aboutText,
+    profileImage: resolveUrl(attrs.profileImage?.data?.attributes?.url),
+    backgroundImage: attrs.backgroundImage?.data?.attributes?.url
+      ? resolveUrl(attrs.backgroundImage.data.attributes.url) : undefined,
+    socialMediaLinks: attrs.socialMediaLinks || [],
+    members: (attrs.members || []).map((m: any) => ({
+      name: m.name || m.artist?.data?.attributes?.name || '',
+      role: m.role || '',
+      instrument: m.instrument || '',
+      sortOrder: m.sortOrder || 0,
+      artist: m.artist?.data ? {
+        name: m.artist.data.attributes.name,
+        slug: m.artist.data.attributes.slug,
+        profileImage: resolveUrl(m.artist.data.attributes.profileImage?.data?.attributes?.url),
+      } : null,
+    })).sort((a: any, b: any) => a.sortOrder - b.sortOrder),
+    musicVideos: (attrs.musicVideos || []).map((v: any) => ({
+      title: v.title || '',
+      youtubeUrl: v.youtubeUrl || v.url || '',
+    })),
+    spotifyEmbedUrl: attrs.spotifyEmbedUrl || null,
+    soundcloudUrl: attrs.soundcloudUrl || null,
+    bandcampUrl: attrs.bandcampUrl || null,
+    appleMusicUrl: attrs.appleMusicUrl || null,
+    mp3Url: attrs.mp3Url || null,
+  };
+}
+
+export async function getArtistsByDesignation(designation: string) {
+  const res = await fetch(
+    `${STRAPI_URL}/api/artists?filters[designation][designation][$eq]=${designation}&populate=profileImage,backgroundImage&sort=orderRank:asc`,
+    { cache: 'no-store' }
+  );
+  if (!res.ok) return [];
+  const json = await res.json().catch(() => ({ data: [] }));
+  return (json.data || []).map((item: any) => ({
+    _id: String(item.id),
+    name: item.attributes.name,
+    slug: item.attributes.slug,
+    signature: item.attributes.signature || item.attributes.name,
+    profileImage: resolveUrl(item.attributes.profileImage?.data?.attributes?.url),
+    backgroundImage: item.attributes.backgroundImage?.data?.attributes?.url
+      ? resolveUrl(item.attributes.backgroundImage.data.attributes.url) : undefined,
+    designation: (item.attributes.designation || []).map((d: any) => d.designation),
+  }));
+}
