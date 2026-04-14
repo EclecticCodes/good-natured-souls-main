@@ -90,6 +90,30 @@ export async function POST(req: NextRequest) {
         )
         ON CONFLICT (stripe_payment_intent_id) DO NOTHING
       `;
+
+      // Wire to cooperative ledger — idempotency_key = event.id prevents duplicate entries on webhook retry
+      const description = items.length > 0
+        ? 'Store order — ' + items.map((i: any) => i.name).join(', ')
+        : 'Store order';
+      await sql`
+        INSERT INTO revenue_entries (
+          source_type,
+          amount,
+          currency,
+          description,
+          reference_id,
+          idempotency_key
+        )
+        VALUES (
+          'stripe_order',
+          ${amountTotal / 100},
+          ${intent.currency},
+          ${description},
+          ${intent.id},
+          ${event.id}
+        )
+        ON CONFLICT (idempotency_key) DO NOTHING
+      `;
     } catch (err) {
       console.error("Failed to save order to Neon:", err);
     }
