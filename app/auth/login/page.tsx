@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -87,8 +88,8 @@ export default function LoginPage() {
                 <input type={showPw ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" autoComplete="current-password" required
                   style={{ width: "100%", background: "#111", border: "1px solid #2a2a2a", borderRadius: 8, padding: "13px 48px 13px 14px", color: "#fff", fontSize: 15, outline: "none", boxSizing: "border-box", fontFamily: "inherit" }} />
                 <button type="button" onClick={() => setShowPw(s => !s)}
-                  style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#444", cursor: "pointer", fontSize: 14, padding: 4 }}>
-                  {showPw ? "🙈" : "��"}
+                  style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#444", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>

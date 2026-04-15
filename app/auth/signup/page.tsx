@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 
 const GENRES = ["Hip-Hop", "R&B", "Soul", "Jazz", "Afrobeats", "Pop", "Electronic", "Gospel", "Reggae", "Other"];
 const TOTAL_STEPS = 3;
@@ -162,8 +163,8 @@ export default function SignupPage() {
                     <div style={{ position: "relative" }}>
                       <input type={showPw ? "text" : "password"} value={form.password} onChange={e => update("password", e.target.value)} placeholder="Min 8 characters" style={{ ...inputStyle, paddingRight: 48 }} required />
                       <button type="button" onClick={() => setShowPw(s => !s)}
-                        style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#444", cursor: "pointer", fontSize: 14 }}>
-                        {showPw ? "🙈" : "👁"}
+                        style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#444", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
                   </div>
