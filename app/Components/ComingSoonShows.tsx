@@ -101,7 +101,7 @@ const ShowsComponent = () => {
     if (show.price === 0) return;
     addItem({
       id: show.id,
-      name: `${show.title} — ${show.venue}[ticket]`,
+      name: `${show.title} — ${show.venue} [ticket]`,
       price: show.price,
       quantity: 1,
       type: 'ticket',
