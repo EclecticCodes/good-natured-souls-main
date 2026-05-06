@@ -4,22 +4,40 @@ import { NextRequest, NextResponse } from "next/server";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
-async function fetchStrapPriceMap(): Promise<Map<string, number>> {
+function strapiHeaders() {
   const token = process.env.STRAPI_API_TOKEN;
+  return { cache: "no-store" as const, headers: token ? { Authorization: `Bearer ${token}` } : {} };
+}
+
+// Fetch authoritative price for a PRODUCT from Strapi products collection
+async function fetchProductPrice(id: string): Promise<number | null> {
   const res = await fetch(
-    `${STRAPI_URL}/api/products?fields=id,price,status&filters[status][$ne]=archived&pagination[limit]=200`,
-    {
-      cache: "no-store",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    }
+    `${STRAPI_URL}/api/products/${id}?fields=price,status`,
+    strapiHeaders()
   );
-  if (!res.ok) throw new Error("Failed to fetch products from Strapi");
+  if (!res.ok) return null;
   const json = await res.json();
-  const map = new Map<string, number>();
-  for (const item of json.data || []) {
-    map.set(String(item.id), Number(item.attributes.price));
-  }
-  return map;
+  const attrs = json?.data?.attributes;
+  if (!attrs || attrs.status === "archived") return null;
+  return Number(attrs.price);
+}
+
+// Fetch authoritative price for a SHOW TICKET from Strapi shows collection
+async function fetchShowPrice(id: string): Promise<number | null> {
+  const res = await fetch(
+    `${STRAPI_URL}/api/shows/${id}?fields=price,soldOut,status,showOwner,ticketPlatform`,
+    strapiHeaders()
+  );
+  if (!res.ok) return null;
+  const json = await res.json();
+  const attrs = json?.data?.attributes;
+  if (!attrs) return null;
+  // Block if sold out, not approved, or not a GNS/stripe ticket
+  if (attrs.soldOut) return null;
+  if (attrs.status && attrs.status !== "approved") return null;
+  if (attrs.showOwner !== "gns" || attrs.ticketPlatform !== "stripe") return null;
+  if (!attrs.price || attrs.price <= 0) return null;
+  return Number(attrs.price);
 }
 
 export async function POST(req: NextRequest) {
@@ -30,24 +48,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No items in cart" }, { status: 400 });
     }
 
-    // Fetch authoritative prices from Strapi
-    const priceMap = await fetchStrapPriceMap();
-
-    // Validate every item against Strapi prices
     let amount = 0;
     const validatedItems: { id: string; name: string; price: number; quantity: number }[] = [];
 
     for (const item of items) {
-      const strapiPrice = priceMap.get(String(item.id));
-      if (strapiPrice === undefined) {
-        return NextResponse.json(
-          { error: `Product not found: ${item.id}` },
-          { status: 400 }
-        );
-      }
       const qty = Math.max(1, Math.floor(Number(item.quantity)));
-      amount += Math.round(strapiPrice * 100) * qty;
-      validatedItems.push({ id: item.id, name: item.name, price: strapiPrice, quantity: qty });
+      const rawId = String(item.id);
+
+      let price: number | null = null;
+
+      if (rawId.startsWith("strapi-")) {
+        // Show ticket — id format is strapi-{strapiId}
+        const strapiId = rawId.replace("strapi-", "");
+        price = await fetchShowPrice(strapiId);
+        if (price === null) {
+          return NextResponse.json(
+            { error: `Ticket not available: ${item.name || rawId}` },
+            { status: 400 }
+          );
+        }
+      } else {
+        // Store product — id is numeric Strapi product id
+        price = await fetchProductPrice(rawId);
+        if (price === null) {
+          return NextResponse.json(
+            { error: `Product not found: ${item.name || rawId}` },
+            { status: 400 }
+          );
+        }
+      }
+
+      amount += Math.round(price * 100) * qty;
+      validatedItems.push({ id: rawId, name: item.name, price, quantity: qty });
     }
 
     if (amount < 50) {

@@ -191,7 +191,7 @@ export default function ShowPage({ params: paramsRaw }: any) {
     // GNS internal — add to cart → Stripe checkout
     addItem({
       id:       `strapi-${show.id}`,
-      name:     `${show.title} — ${show.venue}[ticket]`,
+      name:     `${show.title} — ${show.venue} [ticket]`,
       price:    show.price,
       quantity: 1,
       type:     'ticket',
